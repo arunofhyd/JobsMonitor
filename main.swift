@@ -8,7 +8,7 @@ import WebKit
 // ── Global Single-Source Constants ─────────────────────────────────────────────
 let APP_VERSION: String = {
     if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !v.isEmpty { return v }
-    return "2.3.4"
+    return "2.3.5"
 }()
 let CONTACT_EMAIL = "arunthomashyd@gmail.com"
 let GITHUB_REPO_URL = "https://github.com/arunofhyd/JobsMonitor"
@@ -22,6 +22,7 @@ let settingsFile = appDir.appendingPathComponent("settings.json")
 let dashboardFile = appDir.appendingPathComponent("JobsMonitor_dash.html")
 let logFile = appDir.appendingPathComponent("monitor.log")
 let cookieFile = appDir.appendingPathComponent("auth_cookies.json")
+let jobCacheFile = appDir.appendingPathComponent("job_details_cache.json")
 
 // ── AppleConnect Persistent Cookie Engine ─────────────────────────────────────
 func persistAppleCookies(_ cookies: [HTTPCookie]) {
@@ -616,9 +617,10 @@ struct JobItem: Codable {
 }
 
 // ── Experience Level Detector ──────────────────────────────────────────────────
-func detectExperienceLevel(title: String, summary: String) -> String? {
-    let fullText = "\(title)\n\(summary)".lowercased()
+func detectExperienceLevel(title: String, summary: String, highJobTitle: String? = nil, minQualifications: String? = nil) -> String? {
+    let fullText = "\(title)\n\(summary)\n\(minQualifications ?? "")".lowercased()
     let titleLower = title.lowercased()
+    let highLower = (highJobTitle ?? "").lowercased()
     
     // 1. Director check
     let directorPatterns = [
@@ -627,7 +629,7 @@ func detectExperienceLevel(title: String, summary: String) -> String? {
         "\\bvp\\b", "\\bhead of\\b"
     ]
     for p in directorPatterns {
-        if titleLower.range(of: p, options: .regularExpression) != nil {
+        if titleLower.range(of: p, options: .regularExpression) != nil || highLower.range(of: p, options: .regularExpression) != nil {
             return "Director"
         }
     }
@@ -642,15 +644,41 @@ func detectExperienceLevel(title: String, summary: String) -> String? {
         "\\bgraduate intern\\b", "\\btrainee\\b"
     ]
     for p in internPatterns {
-        if titleLower.range(of: p, options: .regularExpression) != nil || fullText.range(of: p, options: .regularExpression) != nil {
+        if titleLower.range(of: p, options: .regularExpression) != nil ||
+           highLower.range(of: p, options: .regularExpression) != nil ||
+           fullText.range(of: p, options: .regularExpression) != nil {
             return "Intern"
         }
     }
     
-    // 3. Explicit Year Ranges in Summary / Title
+    // 3. Apple Internal Grade (highJobTitle) — Ground Truth Leveling
+    if !highLower.isEmpty {
+        // ICT5, ICT6 = Advanced (Staff, Principal, Fellow)
+        if highLower.range(of: "\\bict[5-6]\\b", options: .regularExpression) != nil {
+            return "Advanced"
+        }
+        // ICT4 = Advanced (Senior)
+        if highLower.range(of: "\\bict4\\b", options: .regularExpression) != nil {
+            return "Advanced"
+        }
+        // ICT3 = Mid (Intermediate)
+        if highLower.range(of: "\\bict3\\b", options: .regularExpression) != nil {
+            return "Mid"
+        }
+        // ICT1, ICT2 = Early (Junior, Associate)
+        if highLower.range(of: "\\bict[1-2]\\b", options: .regularExpression) != nil {
+            return "Early"
+        }
+        // Management levels
+        if highLower.range(of: "\\b(m[1-3]|manager|leader)\\b", options: .regularExpression) != nil {
+            return "Advanced"
+        }
+    }
+    
+    // 4. Explicit Year Ranges in Qualifications / Summary / Title
     var extractedYears: [Int] = []
     let yearPatterns = [
-        "(\\d{1,2})\\s*(?:\\+|plus|\\-\\s*\\d{1,2}|\\s*to\\s*\\d{1,2})?\\s*(?:years?|yrs?)(?:\\s+of)?\\s+(?:experience|relevant|industry|professional|working|hands-on|practical)",
+        "(\\d{1,2})\\s*(?:\\+|plus|\\-\\s*\\d{1,2}|\\s*to\\s*\\d{1,2})?\\s*(?:years?|yrs?)(?:\\s+of)?\\s+(?:experience|relevant|industry|professional|working|hands-on|practical|expertise)",
         "(?:minimum|at least|more than|over|requires?|with)\\s+(\\d{1,2})\\s*(?:\\+\\s*)?(?:years?|yrs?)",
         "(\\d{1,2})\\s*\\+\\s*(?:years?|yrs?)",
         "(\\d{1,2})\\s*\\-\\s*(\\d{1,2})\\s*(?:years?|yrs?)",
@@ -673,30 +701,172 @@ func detectExperienceLevel(title: String, summary: String) -> String? {
     }
     
     if let maxYears = extractedYears.max() {
-        if maxYears >= 7 {
+        if maxYears >= 6 {
             return "Advanced"
-        } else if maxYears >= 4 {
+        } else if maxYears >= 3 {
             return "Mid"
         } else if maxYears >= 1 {
             return "Early"
         }
     }
     
-    // 4. Early career title indicators
-    if titleLower.contains("junior") || titleLower.contains("associate") || titleLower.contains("entry level") || titleLower.contains("entry-level") || titleLower.contains("new grad") || titleLower.contains("jr.") || titleLower.contains("jr ") || titleLower.contains("early career") || titleLower.contains("early careers") {
-        return "Early"
-    }
-    if fullText.contains("early career") || fullText.contains("early careers") || fullText.contains("new graduate") || fullText.contains("entry level") {
-        return "Early"
-    }
-    
-    // 5. Senior / Lead / Manager / Staff title indicators
+    // 5. Senior / Lead / Manager / Staff title indicators (Checked BEFORE generic Early titles)
     if titleLower.contains("principal") || titleLower.contains("staff") || titleLower.contains("senior") || titleLower.contains("lead") || titleLower.contains("architect") || titleLower.contains("manager") || titleLower.contains("store leader") || titleLower.contains("sr.") || titleLower.contains("sr ") || titleLower.contains("distinguished") {
         return "Advanced"
     }
     
-    // 6. Standard individual contributor roles defaulting to Mid
+    // 6. Early career title indicators (Only if not qualified by senior/principal)
+    let hasSeniorQualifier = titleLower.contains("principal") || titleLower.contains("senior") || titleLower.contains("lead") || titleLower.contains("sr.") || titleLower.contains("staff")
+    if !hasSeniorQualifier {
+        if titleLower.contains("junior") || titleLower.contains("associate") || titleLower.contains("entry level") || titleLower.contains("entry-level") || titleLower.contains("new grad") || titleLower.contains("jr.") || titleLower.contains("jr ") || titleLower.contains("early career") || titleLower.contains("early careers") {
+            return "Early"
+        }
+        if fullText.contains("early career") || fullText.contains("early careers") || fullText.contains("new graduate") || fullText.contains("entry level") {
+            return "Early"
+        }
+    }
+    
+    // 7. Standard individual contributor roles defaulting to Mid
     return "Mid"
+}
+
+// ── Job Details Persistent Disk Cache & Enrichment Engine ─────────────────────
+struct CachedJobDetail: Codable {
+    let positionId: String
+    let highJobTitle: String?
+    let minimumQualifications: String?
+    let preferredQualifications: String?
+    let expLevel: String?
+    let fetchedAt: Double
+}
+
+class JobDetailCache {
+    static let shared = JobDetailCache()
+    private var cache: [String: CachedJobDetail] = [:]
+    private let lock = NSLock()
+    
+    init() {
+        load()
+    }
+    
+    func load() {
+        lock.lock()
+        defer { lock.unlock() }
+        if let data = try? Data(contentsOf: jobCacheFile),
+           let decoded = try? JSONDecoder().decode([String: CachedJobDetail].self, from: data) {
+            cache = decoded
+        }
+    }
+    
+    func save() {
+        lock.lock()
+        defer { lock.unlock() }
+        if let data = try? JSONEncoder().encode(cache) {
+            try? data.write(to: jobCacheFile)
+        }
+    }
+    
+    func get(_ positionId: String) -> CachedJobDetail? {
+        lock.lock()
+        defer { lock.unlock() }
+        return cache[positionId]
+    }
+    
+    func setBatch(_ details: [CachedJobDetail]) {
+        lock.lock()
+        for d in details {
+            cache[d.positionId] = d
+        }
+        lock.unlock()
+        save()
+    }
+}
+
+func enrichJobsWithDetails(jobs: [JobItem], completion: @escaping ([JobItem]) -> Void) {
+    if jobs.isEmpty {
+        completion([])
+        return
+    }
+    
+    var enriched = jobs
+    var toFetchIndices: [Int] = []
+    
+    for (i, j) in jobs.enumerated() {
+        if let cached = JobDetailCache.shared.get(j.id) {
+            let detected = detectExperienceLevel(
+                title: j.title,
+                summary: j.summary ?? "",
+                highJobTitle: cached.highJobTitle,
+                minQualifications: cached.minimumQualifications
+            )
+            enriched[i].expLevel = detected
+        } else {
+            toFetchIndices.append(i)
+        }
+    }
+    
+    if toFetchIndices.isEmpty {
+        completion(enriched)
+        return
+    }
+    
+    logMessage("Enriching \(toFetchIndices.count) newly discovered roles via Apple JobDetails API...")
+    let group = DispatchGroup()
+    let lock = NSLock()
+    var newlyCached: [CachedJobDetail] = []
+    
+    for idx in toFetchIndices {
+        let j = jobs[idx]
+        let pid = j.id
+        guard let url = URL(string: "https://jobs.apple.com/api/v1/jobDetails/\(pid)") else { continue }
+        
+        var req = URLRequest(url: url, timeoutInterval: 10.0)
+        req.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+        
+        group.enter()
+        URLSession.shared.dataTask(with: req) { data, _, _ in
+            defer { group.leave() }
+            
+            var highJobTitle: String? = nil
+            var minQual: String? = nil
+            var prefQual: String? = nil
+            
+            if let data = data,
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let res = json["res"] as? [String: Any] {
+                highJobTitle = res["highJobTitle"] as? String
+                minQual = res["minimumQualifications"] as? String
+                prefQual = res["preferredQualifications"] as? String
+            }
+            
+            let detected = detectExperienceLevel(
+                title: j.title,
+                summary: j.summary ?? "",
+                highJobTitle: highJobTitle,
+                minQualifications: minQual
+            )
+            
+            let detail = CachedJobDetail(
+                positionId: pid,
+                highJobTitle: highJobTitle,
+                minimumQualifications: minQual,
+                preferredQualifications: prefQual,
+                expLevel: detected,
+                fetchedAt: Date().timeIntervalSince1970
+            )
+            
+            lock.lock()
+            enriched[idx].expLevel = detected
+            newlyCached.append(detail)
+            lock.unlock()
+        }.resume()
+    }
+    
+    group.notify(queue: .main) {
+        JobDetailCache.shared.setBatch(newlyCached)
+        logMessage("Successfully enriched \(newlyCached.count) roles with ground-truth job details.")
+        completion(enriched)
+    }
 }
 
 struct StateData: Codable {
@@ -3956,6 +4126,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             displayJobs = top40Public
         }
         
+        enrichJobsWithDetails(jobs: displayJobs) { [weak self] enrichedDisplayJobs in
+            guard let self = self else { return }
+            self.finalizeFetchedJobs(
+                displayJobs: enrichedDisplayJobs,
+                top40Public: top40Public,
+                top40Internal: top40Internal,
+                publicIdSet: publicIdSet,
+                internalIdSet: internalIdSet,
+                internalModeActive: internalModeActive,
+                isSSOExpired: isSSOExpired,
+                settings: settings,
+                isManual: isManual
+            )
+        }
+    }
+    
+    func finalizeFetchedJobs(
+        displayJobs: [JobItem],
+        top40Public: [JobItem],
+        top40Internal: [JobItem],
+        publicIdSet: Set<String>,
+        internalIdSet: Set<String>,
+        internalModeActive: Bool,
+        isSSOExpired: Bool,
+        settings: AppSettings,
+        isManual: Bool
+    ) {
         let totalUniqueRoles = displayJobs.count
         if internalModeActive && !top40Internal.isEmpty {
             logMessage("Fetched \(totalUniqueRoles) total active roles (\(top40Internal.count) top internal, \(top40Public.count) top public) for \(settings.locationTitle)")

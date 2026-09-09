@@ -83,7 +83,7 @@ if [ -z "$APP_VERSION" ]; then
     APP_VERSION="$(grep -m1 'APP_VERSION' "$BUILD_DIR/main.swift" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
 fi
 if [ -z "$APP_VERSION" ]; then
-    APP_VERSION="2.3.4"
+    APP_VERSION="2.3.5"
 fi
 
 ok "Source code and assets prepared (v${APP_VERSION})."

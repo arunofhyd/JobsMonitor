@@ -1,7 +1,16 @@
 {
-  "version": "2.3.4",
+  "version": "2.3.5",
   "downloadURL": "https://raw.githubusercontent.com/arunofhyd/JobsMonitor/refs/heads/main/install-jobsmonitor.command",
   "changelog": [
+    {
+      "version": "2.3.5",
+      "date": "2026-09-09",
+      "changes": [
+        "Deterministic Experience Level Classifier: Integrated Apple JobDetails API enrichment engine that extracts internal job grades (ICT5/ICT6/ICT4) and full minimum qualifications, replacing heuristic keyword matching.",
+        "Persistent Job Details Disk Cache: Added local job_details_cache.json store ensuring each role's ground-truth metadata is fetched only once with zero latency or rate-limiting overhead on subsequent scans.",
+        "Prioritized Seniority Overrides: Advanced title indicators (Principal, Senior, Staff, Lead) now take precedence over generic associate designations, fixing misclassification of roles like Principal Regulatory Associate."
+      ]
+    },
     {
       "version": "2.3.4",
       "date": "2026-09-03",
