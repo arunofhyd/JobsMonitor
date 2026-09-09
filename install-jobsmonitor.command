@@ -93,21 +93,28 @@ printf "\n"
 step "Compiling Jobs Monitor v${APP_VERSION}…"
 COMPILE_ERR="$(mktemp)"
 if ! swiftc -O "$BUILD_DIR/main.swift" -o "$BUILD_DIR/$APP_NAME" -framework AppKit -framework ServiceManagement -framework UserNotifications -framework SwiftUI -framework Foundation -framework WebKit -framework AVFoundation 2>"$COMPILE_ERR"; then
-    fail "Could not compile the application."
-    if [ -s "$COMPILE_ERR" ]; then
-        printf "  ${GREY}Compiler Error:${NC}\n"
-        cat "$COMPILE_ERR" | sed 's/^/    /'
-    fi
+    fail "Could not compile the application locally."
+    printf "  ${GREY}Falling back to downloading pre-built release...${NC}\n"
     rm -f "$COMPILE_ERR"
-    printf "\n  ${GREY}Please verify Xcode Command Line Tools are active (run 'xcode-select --install' or 'sudo xcode-select -reset').${NC}\n\n"
-    exit 1
+
+    ZIP_URL="https://github.com/arunofhyd/JobsMonitor/releases/download/v${APP_VERSION}/JobsMonitor.zip"
+    if ! curl -fsSL "$ZIP_URL" -o "$BUILD_DIR/JobsMonitor.zip"; then
+        ZIP_URL="https://github.com/arunofhyd/JobsMonitor/releases/latest/download/JobsMonitor.zip"
+        curl -fsSL "$ZIP_URL" -o "$BUILD_DIR/JobsMonitor.zip" || { fail "Download failed."; exit 1; }
+    fi
+
+    rm -rf "$BUILD_DIR/$APP_NAME.app"
+    unzip -o -q "$BUILD_DIR/JobsMonitor.zip" -d "$BUILD_DIR"
+    ok "Pre-built app downloaded successfully."
+    PREBUILT_DOWNLOADED=true
+else
+    rm -f "$COMPILE_ERR"
+    ok "App compiled successfully."
+    PREBUILT_DOWNLOADED=false
 fi
-rm -f "$COMPILE_ERR"
-ok "App compiled successfully."
 printf "\n"
 
 # ---- Step 4: Building app bundle & app icon -------------------------------
-step "Building app bundle & app icon…"
 if [ "$1" = "--ci" ] || [ "$CI" = "true" ]; then
     BUILD_DIR_LOCAL="$SCRIPT_DIR/Build"
     mkdir -p "$BUILD_DIR_LOCAL"
@@ -117,21 +124,24 @@ else
     pkill -x "$APP_NAME" 2>/dev/null || true
 fi
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
-rm -rf "$APP_BUNDLE"
-mkdir -p "$APP_BUNDLE/Contents/MacOS"
-mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
-chmod 755 "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+if [ "$PREBUILT_DOWNLOADED" != "true" ]; then
+    step "Building app bundle & app icon…"
+    rm -rf "$APP_BUNDLE"
+    mkdir -p "$APP_BUNDLE/Contents/MacOS"
+    mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-[ -f "$BUILD_DIR/AppIcon.icns" ] && cp "$BUILD_DIR/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
-[ -f "$BUILD_DIR/AppIcon.png" ] && cp "$BUILD_DIR/AppIcon.png" "$APP_BUNDLE/Contents/Resources/AppIcon.png"
-[ -f "$BUILD_DIR/logo-jobsmonitor.png" ] && cp "$BUILD_DIR/logo-jobsmonitor.png" "$APP_BUNDLE/Contents/Resources/logo-jobsmonitor.png"
-if [ ! -f "$APP_BUNDLE/Contents/Resources/AppIcon.png" ] && [ -f "$BUILD_DIR/logo-jobsmonitor.png" ]; then
-    cp "$BUILD_DIR/logo-jobsmonitor.png" "$APP_BUNDLE/Contents/Resources/AppIcon.png"
-fi
+    cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+    chmod 755 "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 
-cat << EOF > "$APP_BUNDLE/Contents/Info.plist"
+    [ -f "$BUILD_DIR/AppIcon.icns" ] && cp "$BUILD_DIR/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+    [ -f "$BUILD_DIR/AppIcon.png" ] && cp "$BUILD_DIR/AppIcon.png" "$APP_BUNDLE/Contents/Resources/AppIcon.png"
+    [ -f "$BUILD_DIR/logo-jobsmonitor.png" ] && cp "$BUILD_DIR/logo-jobsmonitor.png" "$APP_BUNDLE/Contents/Resources/logo-jobsmonitor.png"
+    if [ ! -f "$APP_BUNDLE/Contents/Resources/AppIcon.png" ] && [ -f "$BUILD_DIR/logo-jobsmonitor.png" ]; then
+        cp "$BUILD_DIR/logo-jobsmonitor.png" "$APP_BUNDLE/Contents/Resources/AppIcon.png"
+    fi
+
+    cat << EOF > "$APP_BUNDLE/Contents/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://Apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -156,10 +166,11 @@ cat << EOF > "$APP_BUNDLE/Contents/Info.plist"
 </plist>
 EOF
 
-codesign --force --deep --sign - --requirements '=designated => identifier "'"$PLIST_LABEL"'"' "$APP_BUNDLE" >/dev/null 2>&1 || true
-xattr -dr com.apple.quarantine "$APP_BUNDLE" >/dev/null 2>&1 || true
-ok "App bundle created."
-printf "\n"
+    codesign --force --deep --sign - --requirements '=designated => identifier "'"$PLIST_LABEL"'"' "$APP_BUNDLE" >/dev/null 2>&1 || true
+    xattr -dr com.apple.quarantine "$APP_BUNDLE" >/dev/null 2>&1 || true
+    ok "App bundle created."
+    printf "\n"
+fi
 
 if [ "$1" = "--ci" ] || [ "$CI" = "true" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
