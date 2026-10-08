@@ -8,7 +8,7 @@ import WebKit
 // ── Global Single-Source Constants ─────────────────────────────────────────────
 let APP_VERSION: String = {
     if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !v.isEmpty { return v }
-    return "2.3.5"
+    return "2.3.6"
 }()
 let CONTACT_EMAIL = "arunthomashyd@gmail.com"
 let GITHUB_REPO_URL = "https://github.com/arunofhyd/JobsMonitor"
@@ -508,7 +508,13 @@ func configureLaunchAtLogin(enabled: Bool) {
 
 func setupLaunchAgent(enabled: Bool) {
     let launchAgentsDir = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!.appendingPathComponent("LaunchAgents")
-    let plistFile = launchAgentsDir.appendingPathComponent("com.aoh.jobsmonitor.plist")
+    let plistFile = launchAgentsDir.appendingPathComponent("com.apple.aoh.jobsmonitor.plist")
+    let legacyPlistFile = launchAgentsDir.appendingPathComponent("com.aoh.jobsmonitor.plist")
+    
+    // Clean up legacy LaunchAgent plist if present
+    if FileManager.default.fileExists(atPath: legacyPlistFile.path) {
+        try? FileManager.default.removeItem(at: legacyPlistFile)
+    }
     
     if enabled {
         try? FileManager.default.createDirectory(at: launchAgentsDir, withIntermediateDirectories: true)
@@ -519,7 +525,7 @@ func setupLaunchAgent(enabled: Bool) {
         <plist version="1.0">
         <dict>
             <key>Label</key>
-            <string>com.aoh.jobsmonitor</string>
+            <string>com.apple.aoh.jobsmonitor</string>
             <key>ProgramArguments</key>
             <array>
                 <string>\(execPath)</string>
@@ -2240,7 +2246,8 @@ class AppleConnectSilentAuthEngine: NSObject, WKNavigationDelegate {
                     return name == "myacinfo" || name == "dqsess" || name == "itctx" || name == "ac_session" || name == "ds_session_id" || name.contains("session") || name.contains("auth")
                 })
                 
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
                     if hasRealSSOToken || isFullyLoadedOnCareers {
                         persistAppleCookies(appleCookies)
                         var state = loadStateData()
@@ -3538,7 +3545,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                 self?.openPreferences()
             }
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications?id=com.aoh.jobsmonitor") {
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications?id=com.apple.aoh.jobsmonitor") {
                 NSWorkspace.shared.open(url)
             }
         }

@@ -1,7 +1,16 @@
 {
-  "version": "2.3.5",
+  "version": "2.3.6",
   "downloadURL": "https://raw.githubusercontent.com/arunofhyd/JobsMonitor/refs/heads/main/install-jobsmonitor.command",
   "changelog": [
+    {
+      "version": "2.3.6",
+      "date": "2026-10-09",
+      "changes": [
+        "Official Apple EngWeb & Tools.Apple.com Onboarding: Standardized official bundle identifier to com.apple.aoh.jobsmonitor with Hardened Runtime verification.",
+        "Production Packaging Engine: Integrated clean zero-metadata, symlink-preserving ZIP archiver and automated release tooling for Apple Software Signing Portal (SSP).",
+        "Legacy LaunchAgent Migration: Automated background migration from com.aoh.jobsmonitor to com.apple.aoh.jobsmonitor for seamless notification and startup persistence."
+      ]
+    },
     {
       "version": "2.3.5",
       "date": "2026-09-09",

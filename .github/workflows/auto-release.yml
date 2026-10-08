@@ -42,7 +42,11 @@ jobs:
       - name: Zip the App
         run: |
           cd Build
-          zip -r ../JobsMonitor.zip "JobsMonitor.app"
+          export COPYFILE_DISABLE=1
+          xattr -cr "JobsMonitor.app"
+          find "JobsMonitor.app" -name "._*" -delete 2>/dev/null || true
+          find "JobsMonitor.app" -name ".DS_Store" -delete 2>/dev/null || true
+          zip -q -r -y ../JobsMonitor.zip "JobsMonitor.app"
           cd ..
 
       - name: Create or Update Release

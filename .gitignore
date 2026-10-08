@@ -1,4 +1,6 @@
 *.sh
+!build_app.sh
+!release.sh
 *.iconset
 *.app
 *.zip

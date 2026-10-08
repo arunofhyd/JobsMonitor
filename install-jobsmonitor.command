@@ -9,7 +9,7 @@
 # =============================================================================
 
 APP_NAME="JobsMonitor"
-PLIST_LABEL="com.aoh.jobsmonitor"
+PLIST_LABEL="com.apple.aoh.jobsmonitor"
 MAIN_SWIFT_URL="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/main.swift"
 LOGO_PNG_URL="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/logo-jobsmonitor.png"
 APP_ICON_ICNS_URL="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/AppIcon.icns"
@@ -166,7 +166,7 @@ if [ "$PREBUILT_DOWNLOADED" != "true" ]; then
 </plist>
 EOF
 
-    codesign --force --deep --sign - --requirements '=designated => identifier "'"$PLIST_LABEL"'"' "$APP_BUNDLE" >/dev/null 2>&1 || true
+    codesign --force --deep --options runtime --sign - --requirements '=designated => identifier "'"$PLIST_LABEL"'"' "$APP_BUNDLE" >/dev/null 2>&1 || true
     xattr -dr com.apple.quarantine "$APP_BUNDLE" >/dev/null 2>&1 || true
     ok "App bundle created."
     printf "\n"
@@ -215,6 +215,11 @@ setup_launch_agent() {
 </dict>
 </plist>
 EOF
+    # Unload & clean up legacy LaunchAgent if present
+    launchctl unload "$LAUNCH_AGENTS_DIR/com.aoh.jobsmonitor.plist" 2>/dev/null || true
+    rm -f "$LAUNCH_AGENTS_DIR/com.aoh.jobsmonitor.plist" 2>/dev/null || true
+    defaults delete "com.aoh.jobsmonitor" has_launched_jobsmonitor 2>/dev/null || true
+
     defaults delete "$PLIST_LABEL" has_launched_jobsmonitor 2>/dev/null || true
     pkill -9 -x "$APP_NAME" 2>/dev/null || true
     launchctl unload "$PLIST_PATH" 2>/dev/null || true
