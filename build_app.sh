@@ -11,7 +11,7 @@ DEST_APP="/Applications/$APP_NAME.app"
 BUNDLE_ID="com.apple.aoh.jobsmonitor"
 
 # 1. Single Source of Truth: Read version from version.json or main.swift
-VERSION=$(python3 -c "import json; print(json.load(open('$DIR/version.json'))['version'])" 2>/dev/null || grep -m1 'let appVersion =' "$DIR/main.swift" | cut -d'"' -f2 || echo "2.3.6")
+VERSION=$(python3 -c "import json; print(json.load(open('$DIR/version.json'))['version'])" 2>/dev/null || grep -m1 'let appVersion =' "$DIR/main.swift" | cut -d'"' -f2 || echo "2.3.7")
 echo "🔖 Building $APP_NAME v$VERSION ($BUNDLE_ID)..."
 
 # 2. Assemble .app bundle structure

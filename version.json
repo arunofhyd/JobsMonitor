@@ -1,7 +1,15 @@
 {
-  "version": "2.3.6",
+  "version": "2.3.7",
   "downloadURL": "https://raw.githubusercontent.com/arunofhyd/JobsMonitor/refs/heads/main/install-jobsmonitor.command",
   "changelog": [
+    {
+      "version": "2.3.7",
+      "date": "2026-10-09",
+      "changes": [
+        "Internal-Only ICT Grade Enrichment: Enhanced JobDetails engine to query careers.apple.com with authenticated session cookies, ensuring ground-truth ICT level (ICT4/ICT5/ICT6) extraction for internal-only roles.",
+        "Interactive Authentication Feedback: Added immediate visual feedback ('Authenticating...') and auto-focus for AppleConnect sign-in and re-authentication with graceful window closure handling."
+      ]
+    },
     {
       "version": "2.3.6",
       "date": "2026-10-09",

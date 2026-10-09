@@ -8,7 +8,7 @@ import WebKit
 // ── Global Single-Source Constants ─────────────────────────────────────────────
 let APP_VERSION: String = {
     if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !v.isEmpty { return v }
-    return "2.3.6"
+    return "2.3.7"
 }()
 let CONTACT_EMAIL = "arunthomashyd@gmail.com"
 let GITHUB_REPO_URL = "https://github.com/arunofhyd/JobsMonitor"
@@ -816,34 +816,71 @@ func enrichJobsWithDetails(jobs: [JobItem], completion: @escaping ([JobItem]) ->
         return
     }
     
-    logMessage("Enriching \(toFetchIndices.count) newly discovered roles via Apple JobDetails API...")
+    logMessage("Enriching \(toFetchIndices.count) newly discovered roles via Apple JobDetails API (authenticated internal + public)...")
     let group = DispatchGroup()
     let lock = NSLock()
     var newlyCached: [CachedJobDetail] = []
     
+    func fetchSingleJobDetail(pid: String, isInternal: Bool, completion: @escaping (String?, String?, String?) -> Void) {
+        let internalUrl = "https://careers.apple.com/api/v1/jobDetails/\(pid)"
+        let publicUrl = "https://jobs.apple.com/api/v1/jobDetails/\(pid)"
+        
+        let firstUrl = isInternal ? internalUrl : publicUrl
+        let secondUrl = isInternal ? publicUrl : internalUrl
+        
+        func executeFetch(urlString: String, allowFallback: Bool) {
+            guard let url = URL(string: urlString) else {
+                completion(nil, nil, nil)
+                return
+            }
+            
+            var req = URLRequest(url: url, timeoutInterval: 10.0)
+            req.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+            
+            if urlString.contains("careers.apple.com") {
+                let appleCookies = loadPersistedAppleCookies()
+                if !appleCookies.isEmpty {
+                    let cookieHeader = appleCookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
+                    req.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
+                }
+            }
+            
+            URLSession.shared.dataTask(with: req) { data, response, error in
+                var highJobTitle: String? = nil
+                var minQual: String? = nil
+                var prefQual: String? = nil
+                var success = false
+                
+                if let data = data,
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let res = json["res"] as? [String: Any] {
+                    highJobTitle = res["highJobTitle"] as? String
+                    minQual = res["minimumQualifications"] as? String
+                    prefQual = res["preferredQualifications"] as? String
+                    success = true
+                }
+                
+                if success {
+                    completion(highJobTitle, minQual, prefQual)
+                } else if allowFallback {
+                    executeFetch(urlString: secondUrl, allowFallback: false)
+                } else {
+                    completion(nil, nil, nil)
+                }
+            }.resume()
+        }
+        
+        executeFetch(urlString: firstUrl, allowFallback: true)
+    }
+    
     for idx in toFetchIndices {
         let j = jobs[idx]
         let pid = j.id
-        guard let url = URL(string: "https://jobs.apple.com/api/v1/jobDetails/\(pid)") else { continue }
-        
-        var req = URLRequest(url: url, timeoutInterval: 10.0)
-        req.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15", forHTTPHeaderField: "User-Agent")
+        let isInternal = (j.isInternal == true)
         
         group.enter()
-        URLSession.shared.dataTask(with: req) { data, _, _ in
+        fetchSingleJobDetail(pid: pid, isInternal: isInternal) { highJobTitle, minQual, prefQual in
             defer { group.leave() }
-            
-            var highJobTitle: String? = nil
-            var minQual: String? = nil
-            var prefQual: String? = nil
-            
-            if let data = data,
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let res = json["res"] as? [String: Any] {
-                highJobTitle = res["highJobTitle"] as? String
-                minQual = res["minimumQualifications"] as? String
-                prefQual = res["preferredQualifications"] as? String
-            }
             
             let detected = detectExperienceLevel(
                 title: j.title,
@@ -865,7 +902,7 @@ func enrichJobsWithDetails(jobs: [JobItem], completion: @escaping ([JobItem]) ->
             enriched[idx].expLevel = detected
             newlyCached.append(detail)
             lock.unlock()
-        }.resume()
+        }
     }
     
     group.notify(queue: .main) {
@@ -1867,6 +1904,7 @@ class AppleConnectAuthWindowController: NSWindowController, WKNavigationDelegate
     var statusLabel: NSTextField!
     var progressIndicator: NSProgressIndicator!
     var onAuthCompletion: ((Bool) -> Void)?
+    var onWindowClosed: (() -> Void)?
     private var didCompleteAuthSuccessfully = false
 
     convenience init() {
@@ -1965,9 +2003,11 @@ class AppleConnectAuthWindowController: NSWindowController, WKNavigationDelegate
         win.contentView = contentView
     }
 
+
     func startAuthentication(targetUrl: String? = nil) {
         didCompleteAuthSuccessfully = false
         showWindow(nil)
+        window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         
         let settings = loadSettings()
@@ -2089,6 +2129,7 @@ class AppleConnectAuthWindowController: NSWindowController, WKNavigationDelegate
                 onAuthCompletion?(false)
             }
         }
+        onWindowClosed?()
     }
 
     static func clearSession(completion: @escaping () -> Void) {
@@ -2107,6 +2148,7 @@ class AppleConnectAuthWindowController: NSWindowController, WKNavigationDelegate
         }
     }
 }
+
 
 // ── AppleConnect Silent Background Authentication & Internal Role Fetcher ─────────
 class AppleConnectSilentAuthEngine: NSObject, WKNavigationDelegate {
@@ -3256,6 +3298,7 @@ class SettingsWindowController: NSWindowController, NSTextFieldDelegate, NSWindo
         let isAuth = state.isAppleConnectAuthenticated ?? false
         let isExpired = (state.ssoSessionExpired == true)
         
+        signInAppleConnectBtn.isEnabled = true
         if isAuth {
             if isExpired {
                 internalAuthStatusLabel.stringValue = "⚠️ Authentication Session Expired"
@@ -3283,6 +3326,9 @@ class SettingsWindowController: NSWindowController, NSTextFieldDelegate, NSWindo
         if authWindowController == nil {
             authWindowController = AppleConnectAuthWindowController()
         }
+        signInAppleConnectBtn.title = "Authenticating..."
+        signInAppleConnectBtn.isEnabled = false
+        
         let settings = loadSettings()
         authWindowController?.onAuthCompletion = { [weak self] success in
             DispatchQueue.main.async {
@@ -3290,10 +3336,18 @@ class SettingsWindowController: NSWindowController, NSTextFieldDelegate, NSWindo
                     self?.enableInternalModeCheckbox.state = .on
                     self?.internalOnlyCheckbox.isEnabled = true
                 } else {
-                    self?.enableInternalModeCheckbox.state = .off
-                    self?.internalOnlyCheckbox.state = .off
-                    self?.internalOnlyCheckbox.isEnabled = false
+                    let st = loadStateData()
+                    if st.isAppleConnectAuthenticated != true {
+                        self?.enableInternalModeCheckbox.state = .off
+                        self?.internalOnlyCheckbox.state = .off
+                        self?.internalOnlyCheckbox.isEnabled = false
+                    }
                 }
+                self?.updateInternalAuthUI()
+            }
+        }
+        authWindowController?.onWindowClosed = { [weak self] in
+            DispatchQueue.main.async {
                 self?.updateInternalAuthUI()
             }
         }
@@ -3959,6 +4013,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             performCheck(isManual: true)
         }
     }
+    
     
     @objc func openPreferences() {
         if settingsWindowController == nil {
