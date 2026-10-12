@@ -212,6 +212,28 @@
             </a>
         </div>
 
+        <!-- Launch Video Showcase -->
+        <div class="mt-14 max-w-4xl mx-auto">
+            <div class="relative rounded-2xl overflow-hidden border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.9)] bg-black/60">
+                <video id="jobsmonitor-launch-video" class="w-full aspect-video object-cover" poster="brag.jpg" playsinline preload="metadata" controls>
+                    <source src="brag.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="p-3.5 bg-brand-panel/90 backdrop-blur-md border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                        <span class="font-semibold text-white">Jobs Monitor Launch Film</span>
+                        <span>• 20s 1080p Apple Openings Tour (4.6MB)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleJobsMonitorVideo()" id="jobsmonitor-video-btn" class="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/25 transition-all font-sans font-semibold">
+                            ▶ Play Film
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Live preview mockup -->
         <div class="mt-16 relative group max-w-4xl mx-auto">
             <div class="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
@@ -658,8 +680,37 @@
             if (c) c.innerHTML = '<div class="text-red-500 text-center text-sm">Failed to load updates.</div>';
         });
 
-        // Typing effect
+        function toggleJobsMonitorVideo() {
+            const video = document.getElementById('jobsmonitor-launch-video');
+            const btn = document.getElementById('jobsmonitor-video-btn');
+            if (!video) return;
+            if (video.paused) {
+                video.play();
+                if (btn) btn.textContent = '⏸ Pause Film';
+            } else {
+                video.pause();
+                if (btn) btn.textContent = '▶ Play Film';
+            }
+        }
+
+        // Typing effect & video event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            const vid = document.getElementById('jobsmonitor-launch-video');
+            if (vid) {
+                vid.addEventListener('play', () => {
+                    const btn = document.getElementById('jobsmonitor-video-btn');
+                    if (btn) btn.textContent = '⏸ Pause Film';
+                });
+                vid.addEventListener('pause', () => {
+                    const btn = document.getElementById('jobsmonitor-video-btn');
+                    if (btn) btn.textContent = '▶ Play Film';
+                });
+                vid.addEventListener('ended', () => {
+                    const btn = document.getElementById('jobsmonitor-video-btn');
+                    if (btn) btn.textContent = '▶ Replay Film';
+                });
+            }
+
             const el = document.getElementById('typing-text');
             if (!el) return;
             const phrases = ["Yours alone.", "Tracked in real time.", " Internal SSO & Public roles."];

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Jobs Monitor — Apple Openings Launch Film</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            width: 1920px;
+            height: 1080px;
+            overflow: hidden;
+            background-color: #050608;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #ffffff;
+        }
+
+        .stage-wrapper {
+            position: relative;
+            width: 1920px;
+            height: 1080px;
+            background: radial-gradient(circle at 50% 20%, #151821 0%, #07080b 60%, #020304 100%);
+            overflow: hidden;
+        }
+
+        /* Ambient Lighting */
+        .ambient-glow {
+            position: absolute;
+            width: 1200px;
+            height: 600px;
+            top: -150px;
+            left: 360px;
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+            filter: blur(60px);
+        }
+
+        /* Scenes container */
+        .scene {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .scene.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Typography & Badges */
+        .apple-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 24px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f4f4f5;
+            letter-spacing: 0.05em;
+            margin-bottom: 30px;
+            backdrop-filter: blur(12px);
+        }
+
+        .title-huge {
+            font-size: 82px;
+            font-weight: 900;
+            line-height: 1.08;
+            text-align: center;
+            letter-spacing: -0.03em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A1A1AA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .subtitle {
+            font-size: 32px;
+            font-weight: 400;
+            color: #a1a1aa;
+            text-align: center;
+            max-width: 1200px;
+            line-height: 1.45;
+        }
+
+        /* Scene 1: The Problem */
+        .missed-alert-card {
+            margin-top: 48px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px 36px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            border-radius: 20px;
+            font-size: 26px;
+            font-weight: 600;
+            color: #fca5a5;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Scene 2: Reveal & Menu Bar */
+        .menubar-mockup {
+            margin-top: 50px;
+            width: 880px;
+            background: rgba(20, 22, 28, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 30px 40px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+        }
+
+        .menubar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-icon-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+        }
+
+        /* Scene 3: Dual Tracking Grid */
+        .features-grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 36px 30px;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card.highlight {
+            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-icon {
+            font-size: 38px;
+            margin-bottom: 18px;
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .card-desc {
+            font-size: 18px;
+            color: #a1a1aa;
+            line-height: 1.45;
+        }
+
+        /* Scene 4: Dashboard Mockup */
+        .job-rows {
+            margin-top: 36px;
+            width: 1200px;
+            background: rgba(18, 20, 26, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 22px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .job-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            font-size: 20px;
+        }
+
+        .job-badge-internal {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .job-badge-public {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scene 5: Install */
+        .install-box {
+            margin-top: 40px;
+            width: 1100px;
+            background: rgba(12, 14, 18, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 28px 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 22px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+        }
+
+        .install-cmd {
+            color: #38bdf8;
+            font-weight: 600;
+            user-select: all;
+        }
+    </style>
+</head>
+<body>
+    <div class="stage-wrapper">
+        <div class="ambient-glow"></div>
+
+        <!-- SCENE 1: The Problem (t=0.0 - 3.5s) -->
+        <div id="scene-1" class="scene active">
+            <div class="apple-pill">⚠️ THE RACE FOR APPLE ROLES</div>
+            <h1 class="title-huge">Apple openings fill up in hours.<br>Manual checking is too late.</h1>
+            <p class="subtitle">Refreshing jobs.apple.com over and over? By the time you notice, hundreds have already applied.</p>
+            <div class="missed-alert-card">
+                <span>⏱️</span>
+                <span>Missed Role: Senior Software Engineer — CoreOS (Cupertino) • Closed</span>
+            </div>
+        </div>
+
+        <!-- SCENE 2: The Sentinel (t=3.5 - 8.0s) -->
+        <div id="scene-2" class="scene">
+            <div class="apple-pill"> INTRODUCING JOBS MONITOR</div>
+            <h1 class="title-huge">Never miss an opening at Apple.</h1>
+            <p class="subtitle">A native macOS menu bar app that tracks Apple careers in real-time with instant system alerts.</p>
+            <div class="menubar-mockup">
+                <div class="menubar-header">
+                    <div class="logo-box">
+                        <img src="assets/logo-jobsmonitor.png" alt="Logo" class="app-icon-img">
+                        <div>
+                            <div style="font-size: 24px; font-weight: 800; color: #fff;">Jobs Monitor</div>
+                            <div style="font-size: 16px; color: #a1a1aa; font-family: 'JetBrains Mono', monospace;">macOS Menu Bar Sentinel</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e;"></span>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #86efac; font-weight: 600;">Monitoring Live</span>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 18px; color: #e4e4e7;">
+                    <span>Active Portals: <strong>jobs.apple.com</strong> + <strong>careers.apple.com</strong></span>
+                    <span style="color: #a1a1aa;">Check Frequency: <strong>Every 5 mins</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENE 3: Dual-Channel & 24 Global Hubs (t=8.0 - 13.0s) -->
+        <div id="scene-3" class="scene">
+            <div class="apple-pill">⚡ DUAL-CHANNEL TRACKING</div>
+            <h1 class="title-huge">Public & Internal roles.<br>Across 24 global tech hubs.</h1>
+            <p class="subtitle">Built for every engineer targeting Apple worldwide, plus Apple employees tracking internal transfers.</p>
+            <div class="features-grid">
+                <div class="feature-card highlight">
+                    <div class="card-icon"></div>
+                    <div class="card-title">AppleConnect SSO</div>
+                    <div class="card-desc">Integrated authentication sheet tracks internal-only positions on careers.apple.com.</div>
+                </div>
+                <div class="feature-card highlight">
+                    <div class="card-icon">🌍</div>
+                    <div class="card-title">24 Global Hubs</div>
+                    <div class="card-desc">Cupertino, Austin, SF, Seattle, London, Hyderabad, Bengaluru, Singapore, Munich.</div>
+                </div>
+                <div class="feature-card highlight">
+                    <div class="card-icon">🔔</div>
+                    <div class="card-title">Instant macOS Alerts</div>
+                    <div class="card-desc">Native system banners deliver notification the minute a new requisition goes live.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENE 4: Interactive Dashboard & Privacy (t=13.0 - 17.0s) -->
+        <div id="scene-4" class="scene">
+            <div class="apple-pill">🔒 100% ON-DEVICE & PRIVATE</div>
+            <h1 class="title-huge">Instant search.<br>Zero telemetry.</h1>
+            <p class="subtitle">Direct connection from your Mac to Apple portals. No middleman servers, no user accounts, no tracking.</p>
+            <div class="job-rows">
+                <div class="job-row">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">AIML — Senior Machine Learning Engineer, Foundation Models</div>
+                        <div style="font-size: 15px; color: #a1a1aa; margin-top: 4px;">Software and Services • Cupertino, California</div>
+                    </div>
+                    <span class="job-badge-internal"> INTERNAL ONLY</span>
+                </div>
+                <div class="job-row">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">Hardware Engineer — Silicon Validation & Characterization</div>
+                        <div style="font-size: 15px; color: #a1a1aa; margin-top: 4px;">Hardware Technologies • Austin, Texas / Bengaluru, India</div>
+                    </div>
+                    <span class="job-badge-public">🌐 PUBLIC</span>
+                </div>
+                <div class="job-row">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">Software Engineer — Swift Compiler & Developer Tools</div>
+                        <div style="font-size: 15px; color: #a1a1aa; margin-top: 4px;">Core OS Engineering • London, United Kingdom</div>
+                    </div>
+                    <span class="job-badge-public">🌐 PUBLIC</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCENE 5: Install & CTA (t=17.0 - 20.0s) -->
+        <div id="scene-5" class="scene">
+            <div class="apple-pill">🚀 GET STARTED IN SECONDS</div>
+            <h1 class="title-huge">Install natively on your Mac.<br>Free & open source.</h1>
+            <p class="subtitle">Built with Swift for native macOS performance. Verified and safe.</p>
+            <div class="install-box">
+                <span class="install-cmd">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command)"</span>
+                <span style="font-size: 18px; color: #a1a1aa; background: rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 8px;">1-Click Install</span>
+            </div>
+            <div style="margin-top: 30px; font-size: 22px; color: #71717a; font-family: 'JetBrains Mono', monospace;">
+                github.com/arunofhyd/JobsMonitor
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function seekTo(t) {
+            const scenes = [
+                { id: 'scene-1', start: 0.0, end: 3.5 },
+                { id: 'scene-2', start: 3.5, end: 8.0 },
+                { id: 'scene-3', start: 8.0, end: 13.0 },
+                { id: 'scene-4', start: 13.0, end: 17.0 },
+                { id: 'scene-5', start: 17.0, end: 20.0 }
+            ];
+
+            scenes.forEach(s => {
+                const el = document.getElementById(s.id);
+                if (el) {
+                    if (t >= s.start && t < s.end) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Never miss an opening at Apple. 
+
+Apple roles often fill up within hours of going live. Refreshing jobs.apple.com manually is a losing battle.
+
+I built Jobs Monitor — a free, lightweight native macOS menu bar app that tracks jobs.apple.com & careers.apple.com in real-time.
+
+⚡ Dual-channel: Public + AppleConnect SSO Internal mode
+🌍 24 global tech hubs (Cupertino, Austin, London, Bengaluru, Singapore, Munich...)
+🔔 Instant native macOS alerts the second new roles go live
+🔒 100% on-device & private. Zero telemetry. No accounts required.
+
+One-line terminal install:
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command)"
+
+Open source: https://github.com/arunofhyd/JobsMonitor
