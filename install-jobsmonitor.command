@@ -24,15 +24,15 @@ GREY='\033[0;90m'
 NC='\033[0m'
 BOLD='\033[1m'
 
-step() { printf "  ${BLUE}➔${NC} %s\n" "$1"; }
-ok()   { printf "  ${GREEN}✔${NC} %s\n" "$1"; }
-fail() { printf "  ${RED}✖${NC} %s\n" "$1"; }
-line() { printf "${GREY}─────────────────────────────────────────────────────────────${NC}\n"; }
+step() { printf '  %b➔%b %s\n' "${BLUE}" "${NC}" "$1"; }
+ok()   { printf '  %b✔%b %s\n' "${GREEN}" "${NC}" "$1"; }
+fail() { printf '  %b✖%b %s\n' "${RED}" "${NC}" "$1"; }
+line() { printf '%b\n' "${GREY}─────────────────────────────────────────────────────────────${NC}"; }
 
 clear 2>/dev/null || true
 printf "\n"
 line
-printf "${WHITE}${BOLD}    Jobs Monitor Installer${NC}\n"
+printf '%b\n' "${WHITE}${BOLD}    Jobs Monitor Installer${NC}"
 line
 printf "\n"
 
@@ -40,9 +40,9 @@ printf "\n"
 step "Checking system prerequisites…"
 if ! command -v swiftc >/dev/null 2>&1; then
     fail "Swift compiler (swiftc) not found."
-    printf "\n  ${GREY}Triggering Xcode Command Line Tools installation…${NC}\n"
+    printf '\n%b\n' "  ${GREY}Triggering Xcode Command Line Tools installation…${NC}"
     xcode-select --install >/dev/null 2>&1 || true
-    printf "  ${GREY}Please complete the Apple installer prompt and re-run this command.${NC}\n\n"
+    printf '%b\n\n' "  ${GREY}Please complete the Apple installer prompt and re-run this command.${NC}"
     exit 1
 fi
 ok "Prerequisites verified."
@@ -94,7 +94,7 @@ step "Compiling Jobs Monitor v${APP_VERSION}…"
 COMPILE_ERR="$(mktemp)"
 if ! swiftc -O "$BUILD_DIR/main.swift" -o "$BUILD_DIR/$APP_NAME" -framework AppKit -framework ServiceManagement -framework UserNotifications -framework SwiftUI -framework Foundation -framework WebKit -framework AVFoundation 2>"$COMPILE_ERR"; then
     fail "Could not compile the application locally."
-    printf "  ${GREY}Falling back to downloading pre-built release...${NC}\n"
+    printf '%b\n' "  ${GREY}Falling back to downloading pre-built release...${NC}"
     rm -f "$COMPILE_ERR"
 
     ZIP_URL="https://github.com/arunofhyd/JobsMonitor/releases/download/v${APP_VERSION}/JobsMonitor.zip"
@@ -234,7 +234,7 @@ if [ "$INSTALLED" = "true" ]; then
     ok "Jobs Monitor installed & running."
     printf "\n"
     line
-    printf "${WHITE}${BOLD}   ✓ Jobs Monitor is installed and running in your menu bar.${NC}\n"
+    printf '%b\n' "${WHITE}${BOLD}   ✓ Jobs Monitor is installed and running in your menu bar.${NC}"
     line
     printf "\n"
     exit 0
