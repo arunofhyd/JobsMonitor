@@ -1,27 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SEO Meta Tags -->
-    <title>Jobs Monitor | Real-Time Apple Job Openings for macOS</title>
-    <meta name="description" content="Jobs Monitor is a free, privacy-first native macOS menu bar app for tracking Apple job openings in real-time. Features internal careers portal tracking specially for Apple employees and global public roles across 20+ countries. 100% on-device.">
-    <meta name="keywords" content="Apple jobs monitor, apple employee internal jobs, apple careers portal, apple jobs tracker, apple connect sso, macOS menu bar app, apple openings, native mac utility">
+    <title>Jobs Monitor — Real-Time Apple Job Openings for macOS</title>
+    <meta name="description" content="Jobs Monitor is an open-source, native macOS menu bar application for tracking Apple job openings in real-time. Zero third-party telemetry, internal portal integration, and customizable keyword alerts.">
+    <meta name="keywords" content="apple jobs tracker, macos job monitor, apple careers alert, mac menu bar job tracker, swift menu bar utility">
     <meta name="author" content="Arun Thomas">
     <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://jobsmonitor.vercel.app/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Jobs Monitor | Real-Time Apple Job Openings for macOS">
-    <meta property="og:description" content="A privacy-first native macOS menu bar app that tracks Apple job openings in real time. Internal careers portal roles specially for Apple employees & public openings 100% on-device.">
-    <meta property="og:image" content="logo-jobsmonitor.png">
+    <meta property="og:url" content="https://jobsmonitor.vercel.app/">
+    <meta property="og:title" content="Jobs Monitor — Real-Time Apple Job Openings for macOS">
+    <meta property="og:description" content="A native menu bar utility to track Apple job openings with instant notifications. 100% on-device.">
+    <meta property="og:image" content="https://jobsmonitor.vercel.app/brag.jpg">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Jobs Monitor | Real-Time Apple Job Openings for macOS">
-    <meta property="twitter:description" content="Track Apple job openings in real time from your macOS menu bar. 100% on-device.">
-    <meta property="twitter:image" content="logo-jobsmonitor.png">
+    <meta property="twitter:url" content="https://jobsmonitor.vercel.app/">
+    <meta property="twitter:title" content="Jobs Monitor — Real-Time Apple Job Openings for macOS">
+    <meta property="twitter:description" content="A native menu bar utility to track Apple job openings. Built the hard way.">
+    <meta property="twitter:image" content="https://jobsmonitor.vercel.app/brag.jpg">
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -29,660 +32,577 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Jobs Monitor",
-      "operatingSystem": "macOS",
+      "operatingSystem": "macOS 13.0+",
       "applicationCategory": "UtilitiesApplication",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "description": "A privacy-first macOS menu bar application for tracking Apple internal and public job postings in real time.",
-      "author": { "@type": "Person", "name": "Arun Thomas" },
-      "softwareVersion": "Latest"
+      "description": "Native macOS menu bar app for tracking Apple job openings in real-time.",
+      "author": { "@type": "Person", "name": "Arun Thomas", "url": "https://github.com/arunofhyd" },
+      "softwareVersion": "2.3.7"
     }
     </script>
 
-    <!-- Dynamic Cache-Busted Favicons -->
-    <script>
-        const APP_VERSION = '2.3.5';
-        [
-            { rel: 'shortcut icon', href: `logo-jobsmonitor.png?v=${APP_VERSION}` },
-            { rel: 'icon', href: `logo-jobsmonitor.png?v=${APP_VERSION}`, type: 'image/png' },
-            { rel: 'apple-touch-icon', href: `AppIcon.png?v=${APP_VERSION}` }
-        ].forEach(attr => {
-            const link = document.createElement('link');
-            Object.assign(link, attr);
-            document.head.appendChild(link);
-        });
-    </script>
+    <link rel="icon" href="logo-jobsmonitor.png" type="image/png">
 
+    <!-- ArtCraft Font Stack: Instrument Serif + Inter + Geist Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with ArtCraft Design Tokens -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         if (history.scrollRestoration) { history.scrollRestoration = 'manual'; }
+        
+        try {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'light') document.documentElement.classList.remove('dark');
+            else document.documentElement.classList.add('dark');
+        } catch (_) {}
+
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
+                        canvas: {
+                            light: '#f2f1ee',
+                            dark: '#0b0b0c',
+                        },
+                        panel: {
+                            light: '#ffffff',
+                            dark: '#131316',
+                            subtleDark: '#17171c',
+                            subtleLight: '#f8f7f5'
+                        },
+                        borderLine: {
+                            light: '#dedcd5',
+                            dark: '#222228',
+                            strongDark: '#32323b',
+                            strongLight: '#c9c6bd'
+                        },
+                        ink: {
+                            strongDark: '#f5f5f7',
+                            mutedDark: '#8e8e98',
+                            faintDark: '#565660',
+                            strongLight: '#18181b',
+                            mutedLight: '#65656e',
+                            faintLight: '#a1a1aa'
+                        },
                         brand: {
-                            ink: '#0b0d10',
-                            panel: '#15181d',
-                            card: '#1c1f26'
+                            blue: '#0A84FF',
+                            indigo: '#6366F1'
                         }
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                        mono: ['Fira Code', 'SF Mono', 'monospace']
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['"Instrument Serif"', 'serif'],
+                        mono: ['"Geist Mono"', 'monospace'],
                     }
                 }
             }
         }
 
-        function copyEmail(btn) {
-            navigator.clipboard.writeText('arunthomashyd@gmail.com').then(() => {
-                const original = "Contact Developer";
-                btn.innerText = 'Email Copied!';
-                btn.classList.add('text-white');
-                setTimeout(() => { 
-                    btn.innerText = original; 
-                    btn.classList.remove('text-white'); 
-                }, 2000);
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function copyTerminalCommand(btn) {
+            const cmd = 'curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command | bash';
+            const label = btn.querySelector('.copy-label') || btn;
+            const original = label.innerText;
+
+            navigator.clipboard.writeText(cmd).then(() => {
+                label.innerText = 'COPIED TO CLIPBOARD';
+                btn.classList.add('border-brand-blue');
+                setTimeout(() => {
+                    label.innerText = original;
+                    btn.classList.remove('border-brand-blue');
+                }, 2200);
+            }).catch(() => {
+                label.innerText = 'COPIED';
+                setTimeout(() => { label.innerText = original; }, 2200);
             });
         }
-
-        function copyToClipboard(text, elementId) {
-            const btn = document.getElementById(elementId);
-            const codeSpan = btn ? btn.parentElement.querySelector('span') : null;
-            if (codeSpan) {
-                const range = document.createRange();
-                range.selectNodeContents(codeSpan);
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-                try {
-                    navigator.clipboard.writeText(text).then(() => {
-                        if (btn) {
-                            const original = btn.innerText;
-                            btn.innerText = 'Copied!';
-                            btn.classList.add('bg-white', 'text-black');
-                            setTimeout(() => {
-                                btn.innerText = original;
-                                btn.classList.remove('bg-white', 'text-black');
-                            }, 2000);
-                        }
-                    });
-                } catch(e) {
-                    if (btn) {
-                        const original = btn.innerText;
-                        btn.innerText = 'Selected — ⌘C';
-                        setTimeout(() => { btn.innerText = original; }, 2500);
-                    }
-                }
-            }
-        }
     </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap');
-        body { background-color: #0b0d10; color: #e6e8eb; }
-        
-        .gradient-text {
-            background: linear-gradient(90deg, #FFFFFF 0%, #A1A1AA 100%);
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent;
+        .blueprint-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(120, 120, 130, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(120, 120, 130, 0.05) 1px, transparent 1px);
         }
-
-        .typing-cursor::after {
-            content: '|'; 
-            margin-left: 2px; 
-            animation: blink 1s step-end infinite;
-            color: #FFFFFF; 
-            -webkit-text-fill-color: #FFFFFF;
+        .spotlight-card {
+            position: relative;
         }
-        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-
-        .pill { animation: pulse-glow 3s infinite ease-in-out; }
-        @keyframes pulse-glow {
-            0%,100% { box-shadow: 0 0 5px rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); }
-            50% { box-shadow: 0 0 18px rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.7); }
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            background: radial-gradient(400px circle at var(--mouse-x, -400px) var(--mouse-y, -400px), rgba(10, 132, 255, 0.25), transparent 70%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1;
         }
-
-        /* Custom scrollbar for horizontal carousel */
-        #changelog-container::-webkit-scrollbar { height: 6px; }
-        #changelog-container::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 9999px; }
-        #changelog-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.25); border-radius: 9999px; }
-        #changelog-container::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
-
-        /* Custom scrollbar for mockup */
-        #mockup-job-list::-webkit-scrollbar { width: 5px; }
-        #mockup-job-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
-        #mockup-job-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+        .spotlight-card > * {
+            position: relative;
+            z-index: 2;
+        }
     </style>
 </head>
-<body class="antialiased selection:bg-white selection:text-black">
+<body class="bg-canvas-light dark:bg-canvas-dark text-ink-strongLight dark:text-ink-strongDark font-sans antialiased selection:bg-brand-blue selection:text-white transition-colors duration-200">
 
-    <!-- Navbar -->
-    <nav class="fixed w-full z-50 bg-brand-ink/90 backdrop-blur-md border-b border-white/10">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="logo-jobsmonitor.png" alt="Jobs Monitor Logo" width="28" height="28" class="rounded-lg object-contain">
-                <span class="font-bold text-xl tracking-tight text-white">Jobs Monitor</span>
+    <!-- Top Technical HUD Navigation -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-canvas-light/90 dark:bg-canvas-dark/90 border-b border-borderLine-light dark:border-borderLine-dark transition-colors duration-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between font-mono text-xs tracking-wider">
+            
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center space-x-2.5 group">
+                    <img src="logo-jobsmonitor.png" alt="JobsMonitor" class="w-5 h-5 rounded object-cover">
+                    <span class="font-bold text-sm tracking-tight font-sans text-neutral-900 dark:text-white">JOBS MONITOR</span>
+                </a>
+                <span class="text-neutral-400 dark:text-neutral-600 hidden sm:inline">/</span>
+                <span class="text-ink-mutedLight dark:text-ink-mutedDark hidden sm:inline uppercase text-[11px]">macOS Menu Bar Daemon</span>
             </div>
-            <div class="hidden md:flex gap-8 text-sm font-medium text-gray-400">
-                <a href="#features" class="hover:text-white transition-colors">Features</a>
-                <a href="#launch" class="version-label hover:text-white transition-colors">Latest Version</a>
-                <a href="#how-it-works" class="hover:text-white transition-colors">How it Works</a>
-                <a href="#install" class="hover:text-white transition-colors">Install</a>
-                <a href="#changelog" class="hover:text-white transition-colors">Changelog</a>
+
+            <div class="hidden md:flex items-center space-x-4 text-[11px] text-ink-mutedLight dark:text-ink-mutedDark font-mono border border-borderLine-light dark:border-borderLine-dark px-3 py-1 rounded bg-panel-light dark:bg-panel-dark">
+                <span>SILENT POLLING</span>
+                <span>•</span>
+                <span>GLOBAL ROLES</span>
+                <span>•</span>
+                <span class="text-emerald-500 font-semibold">100% ON-DEVICE</span>
             </div>
-            <a href="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command" target="_blank" rel="noopener noreferrer"
-               class="bg-white/10 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-white/20 transition-all border border-white/10 flex items-center gap-1.5">
-               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-               <span>View Code</span>
-            </a>
+
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <a id="version-pill" href="https://github.com/arunofhyd/JobsMonitor/releases" target="_blank" rel="noopener noreferrer" 
+                   class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded border border-borderLine-light dark:border-borderLine-dark hover:border-brand-blue/60 text-ink-mutedLight dark:text-ink-mutedDark hover:text-brand-blue transition-all text-[11px]">
+                    <span class="version-label">v2.3.7</span>
+                    <span class="opacity-50">↗</span>
+                </a>
+
+                <button onclick="toggleTheme()" aria-label="Toggle theme" class="p-1.5 rounded border border-borderLine-light dark:border-borderLine-dark hover:text-brand-blue text-ink-mutedLight dark:text-ink-mutedDark transition-colors">
+                    <svg class="w-3.5 h-3.5 hidden dark:block fill-current" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+                    <svg class="w-3.5 h-3.5 block dark:hidden fill-current" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+                </button>
+
+                <a href="https://github.com/arunofhyd/JobsMonitor" target="_blank" rel="noopener noreferrer" 
+                   class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1 bg-panel-light dark:bg-panel-dark border border-borderLine-light dark:border-borderLine-dark hover:border-ink-mutedLight dark:hover:border-ink-mutedDark text-ink-strongLight dark:text-ink-strongDark rounded transition-all">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>GitHub</span>
+                </a>
+            </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero -->
-    <section class="pt-28 pb-16 px-6 max-w-7xl mx-auto text-center">
-        <a id="version-pill" href="https://github.com/arunofhyd/JobsMonitor/releases/latest" target="_blank" rel="noopener noreferrer"
-           class="pill inline-flex items-center gap-1.5 px-3.5 py-1 mb-6 rounded-full bg-white/10 border border-white/30 text-white text-xs font-mono hover:bg-white/20 transition-all cursor-pointer">
-            <span>Latest Version</span>
-            <span class="opacity-60 text-[10px]">↗</span>
-        </a>
+    <!-- Main Content Blueprint Container -->
+    <main class="blueprint-grid min-h-screen">
 
-        <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-            Never miss an opening.<br>
-            <span id="typing-text" class="gradient-text typing-cursor">Yours alone.</span>
-        </h1>
-        <p class="text-xl text-gray-400 mb-4 max-w-3xl mx-auto leading-relaxed">
-            A native macOS menu bar app for tracking Apple job openings in real time. <span class="text-white font-medium">Open to everyone for global public jobs</span> (<code class="text-gray-300">jobs.apple.com</code>), plus <span class="text-white font-medium">exclusive internal careers portal tracking specially for Apple employees</span> (<code class="text-gray-300">careers.apple.com</code>).
-        </p>
-        <p class="text-xl font-bold text-gray-300 mb-6 max-w-2xl mx-auto">
-            100% on-device. Zero telemetry. No accounts needed for public tracking.
-        </p>
-        <p class="text-sm font-semibold text-gray-400 mb-10 tracking-widest flex items-center justify-center gap-2">
-            MADE FOR
-            <svg class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.127 3.675-.552 9.127 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-            macOS
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a href="#install" class="bg-white text-black px-8 py-3 rounded-lg font-bold hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center gap-2">
-                <span>⚡ Install via Terminal</span>
-            </a>
-            <a href="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command" download="install-jobsmonitor.command" 
-               class="bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span>Download .command</span>
-            </a>
-        </div>
+        <!-- Hero Section -->
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16">
+            
+            <div class="inline-flex items-center space-x-2 font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark border border-borderLine-light dark:border-borderLine-dark px-3 py-1 rounded bg-panel-light dark:bg-panel-dark mb-8">
+                <span class="text-brand-blue font-bold">01</span>
+                <span class="opacity-40">/</span>
+                <span>NATIVE MENU BAR DAEMON</span>
+                <span class="opacity-40">•</span>
+                <span class="text-emerald-500 font-semibold">ZERO THIRD-PARTY TELEMETRY</span>
+            </div>
 
-        <!-- Launch Video Showcase -->
-        <div class="mt-14 max-w-4xl mx-auto">
-            <div class="relative rounded-2xl overflow-hidden border border-white/15 shadow-[0_25px_70px_rgba(0,0,0,0.9)] bg-black/60">
-                <video id="jobsmonitor-launch-video" class="w-full aspect-video object-cover" poster="brag.jpg" playsinline preload="metadata" controls>
-                    <source src="brag.mp4" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="p-3.5 bg-brand-panel/90 backdrop-blur-md border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                        <span class="font-semibold text-white">Jobs Monitor Launch Film</span>
-                        <span>• 20s 1080p Apple Openings Tour (4.6MB)</span>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-ink-strongLight dark:text-ink-strongDark leading-[1.05] mb-6">
+                Real-time Apple job alerts.<br>
+                <span class="font-serif italic font-normal text-brand-blue selection:text-white">Built the hard way.</span>
+            </h1>
+
+            <p class="text-lg sm:text-xl text-ink-mutedLight dark:text-ink-mutedDark max-w-3xl leading-relaxed mb-10">
+                A native macOS menu bar application designed to silently monitor and instantly alert you the second target career openings appear at Apple. Supports both global public jobs and authenticated internal career portals. 100% on-device, lightweight, and open source.
+            </p>
+
+            <!-- 1-Click Terminal Snippet & Action Bar -->
+            <div class="space-y-4 max-w-3xl">
+                <div class="p-1 rounded-lg border border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 font-mono text-xs">
+                        <div class="flex items-center space-x-2 overflow-x-auto py-1 text-ink-strongLight dark:text-ink-strongDark scrollbar-none">
+                            <span class="text-brand-blue font-bold select-none">$</span>
+                            <span class="select-all">curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command | bash</span>
+                        </div>
+                        <button onclick="copyTerminalCommand(this)" 
+                                class="shrink-0 px-4 py-2 rounded bg-neutral-900 dark:bg-neutral-100 hover:bg-brand-blue dark:hover:bg-brand-blue text-white dark:text-neutral-900 dark:hover:text-white font-mono font-medium text-xs tracking-wider transition-all flex items-center justify-center space-x-1.5 border border-transparent">
+                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            <span class="copy-label">COPY COMMAND</span>
+                        </button>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="toggleJobsMonitorVideo()" id="jobsmonitor-video-btn" class="px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-white border border-white/25 transition-all font-sans font-semibold">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2 font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark">
+                    <a href="install-jobsmonitor.command" download="install-jobsmonitor.command" 
+                       class="inline-flex items-center space-x-2 px-4 py-2 rounded border border-borderLine-light dark:border-borderLine-dark hover:border-ink-mutedLight dark:hover:border-ink-mutedDark bg-panel-light dark:bg-panel-dark text-ink-strongLight dark:text-ink-strongDark transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        <span>Download install-jobsmonitor.command</span>
+                    </a>
+
+                    <a href="https://github.com/arunofhyd/JobsMonitor/releases/latest" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center space-x-1.5 px-3 py-2 text-ink-mutedLight dark:text-ink-mutedDark hover:text-brand-blue transition-colors">
+                        <span>Universal Release (v2.3.7)</span>
+                        <span>↗</span>
+                    </a>
+
+                    <span class="hidden sm:inline text-neutral-400 dark:text-neutral-700">•</span>
+                    <span class="text-[11px] text-ink-faintLight dark:text-ink-faintDark">Apple Silicon &amp; Intel (macOS 13+)</span>
+                </div>
+            </div>
+
+            <!-- Video Demonstration Bezel -->
+            <div class="mt-16 border border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark rounded-xl overflow-hidden shadow-2xl">
+                <div class="h-10 px-4 border-b border-borderLine-light dark:border-borderLine-dark flex items-center justify-between bg-panel-subtleLight dark:bg-panel-subtleDark font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E]/50 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123]/50 inline-block"></span>
+                        <span class="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29]/50 inline-block"></span>
+                        <span class="ml-3 text-[11px] text-ink-faintLight dark:text-ink-faintDark">JobsMonitor.app — Menu Bar Daemon</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-[11px]">
+                        <span class="flex items-center space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
+                            <span>APP DEMO</span>
+                        </span>
+                        <button id="jobs-video-btn" onclick="toggleJobsVideo()" class="px-2 py-0.5 rounded border border-borderLine-light dark:border-borderLine-dark hover:border-brand-blue text-ink-strongLight dark:text-ink-strongDark transition-colors">
                             ▶ Play Film
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Live preview mockup -->
-        <div class="mt-16 relative group max-w-4xl mx-auto">
-            <div class="absolute -inset-1 bg-gradient-to-r from-white/20 via-white/10 to-white/20 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-            <div class="relative bg-brand-panel rounded-xl border border-white/10 p-6 shadow-2xl text-left">
-                <!-- Mac Window Header -->
-                <div class="flex items-center justify-between pb-5 border-b border-white/10">
-                    <div class="flex items-center gap-1.5">
-                        <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                        <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                        <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                        <span class="ml-3 text-xs text-gray-400 font-mono"> Jobs Monitor — Live Dashboard</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                        <span class="text-[11px] font-mono text-gray-300">AppleConnect Active (Internal Mode)</span>
-                    </div>
-                </div>
-
-                <!-- Interactive Filters & Search inside Mockup -->
-                <div class="py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <!-- Segmented Portal Filter -->
-                    <div class="inline-flex bg-black/50 p-1 rounded-lg border border-white/10 text-xs font-medium">
-                        <button onclick="filterMockup('all', this)" class="mockup-tab px-3 py-1.5 rounded-md bg-white text-black font-semibold shadow transition-all">All Roles (80)</button>
-                        <button onclick="filterMockup('internal', this)" class="mockup-tab px-3 py-1.5 rounded-md text-gray-400 hover:text-white transition-all flex items-center gap-1"> Internal (Apple Employees) <span class="bg-white/10 text-[10px] px-1.5 py-0.2 rounded">40</span></button>
-                        <button onclick="filterMockup('public', this)" class="mockup-tab px-3 py-1.5 rounded-md text-gray-400 hover:text-white transition-all flex items-center gap-1">
-                            <svg class="portal-icon inline-block" style="vertical-align:-1px; width:13px; height:13px;" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/></svg>
-                            <span>Public</span>
-                            <span class="bg-white/10 text-[10px] px-1.5 py-0.2 rounded">40</span>
-                        </button>
-                    </div>
-
-                    <!-- Live search box -->
-                    <div class="relative w-full md:w-64">
-                        <input id="mockup-search" type="text" placeholder="Filter title, team, city…" oninput="searchMockupJobs(this.value)"
-                               class="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-white/40 font-sans">
-                        <span class="absolute right-2.5 top-2 text-[10px] text-gray-500 font-mono">⌘F</span>
-                    </div>
-                </div>
-
-                <!-- Interactive Job List -->
-                <div id="mockup-job-list" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                    <!-- Job 1 -->
-                    <div class="job-item p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-portal="internal" data-text="software engineer apple silicon cupertino advanced internal">
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-semibold text-sm text-white hover:underline cursor-pointer">Software Engineer — Apple Silicon Architecture</span>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10">Advanced (7+ yrs)</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
-                                <span>Hardware &amp; Silicon</span>
-                                <span>•</span>
-                                <span class="text-gray-300">Cupertino, CA, USA</span>
-                                <span>•</span>
-                                <span class="text-gray-500 font-mono">Posted 2h ago</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-white/10 text-white border border-white/15"> Internal ↗</span>
-                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-white/10 text-gray-300 border border-white/15 inline-flex items-center gap-1">
-                                <svg class="portal-icon" style="vertical-align:-1px; width:12px; height:12px;" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/></svg>
-                                Public ↗
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Job 2 -->
-                    <div class="job-item p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-portal="internal" data-text="machine learning research scientist foundation models hyderabad mid internal only apple employee">
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-semibold text-sm text-white hover:underline cursor-pointer">AI/ML Research Scientist — Foundation Models</span>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10">Mid (4–7 yrs)</span>
-                                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-400/10 text-amber-300 border border-amber-400/20">Apple Employees Only</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
-                                <span>AI &amp; Machine Learning</span>
-                                <span>•</span>
-                                <span class="text-gray-300">Hyderabad, Telangana, India</span>
-                                <span>•</span>
-                                <span class="text-gray-500 font-mono">Posted 5h ago</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-white/15 text-white border border-white/25"> Internal Only ↗</span>
-                        </div>
-                    </div>
-
-                    <!-- Job 3 -->
-                    <div class="job-item p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-portal="public" data-text="senior ios ui engineer system experience london advanced public">
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-semibold text-sm text-white hover:underline cursor-pointer">Senior iOS UI Engineer — System Experience</span>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10">Advanced (7+ yrs)</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
-                                <span>Software and Services</span>
-                                <span>•</span>
-                                <span class="text-gray-300">London, United Kingdom</span>
-                                <span>•</span>
-                                <span class="text-gray-500 font-mono">Posted 1d ago</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-white/10 text-gray-300 border border-white/15 inline-flex items-center gap-1">
-                                <svg class="portal-icon" style="vertical-align:-1px; width:12px; height:12px;" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/></svg>
-                                Public ↗
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Job 4 -->
-                    <div class="job-item p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-portal="public" data-text="engineering project manager hardware austin early public">
-                        <div>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <span class="font-semibold text-sm text-white hover:underline cursor-pointer">Engineering Project Manager — Hardware Tech</span>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-gray-300 border border-white/10">Early (1–3 yrs)</span>
-                            </div>
-                            <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
-                                <span>Operations &amp; Supply Chain</span>
-                                <span>•</span>
-                                <span class="text-gray-300">Austin, TX, USA</span>
-                                <span>•</span>
-                                <span class="text-gray-500 font-mono">Posted 1d ago</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            <span class="px-2.5 py-1 rounded text-xs font-semibold bg-white/10 text-gray-300 border border-white/15 inline-flex items-center gap-1">
-                                <svg class="portal-icon" style="vertical-align:-1px; width:12px; height:12px;" viewBox="0 0 16 16" fill="currentColor"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7Zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-5.784 6A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216ZM4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/></svg>
-                                Public ↗
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Summary Bar in Mockup -->
-                <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-gray-500 font-mono">
-                    <span id="mockup-count-label">Showing 4 of 80 active positions</span>
-                    <span>Interval: 15 min • Daily Digest: 10:00 AM</span>
+                <div class="relative bg-black aspect-video flex items-center justify-center">
+                    <video id="jobs-launch-video" class="w-full h-full object-cover" poster="brag.jpg" playsinline preload="metadata">
+                        <source src="brag.mp4" type="video/mp4">
+                        Your browser does not support HTML5 video.
+                    </video>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Features -->
-    <section id="features" class="py-20 bg-black/20">
-        <div class="max-w-6xl mx-auto px-6">
-            <h2 class="text-3xl font-bold mb-12 text-center">Why use Jobs Monitor?</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🌐</div>
-                    <h3 class="text-xl font-bold mb-2">Public Tracking (Open to All)</h3>
-                    <p class="text-gray-400">Anyone can track new openings directly on <code class="text-white">jobs.apple.com</code> across 20+ global countries and 24 major tech hubs with zero login required.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🔐</div>
-                    <h3 class="text-xl font-bold mb-2"> Apple Employee Internal Mode</h3>
-                    <p class="text-gray-400"><strong class="text-white">Specially for current Apple employees:</strong> Integrated AppleConnect SSO authentication via a secure embedded sheet to unlock and monitor internal-only requisitions on <code class="text-white">careers.apple.com</code>.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">📊</div>
-                    <h3 class="text-xl font-bold mb-2">Dual-Channel 40+40 Quotas</h3>
-                    <p class="text-gray-400">Independent 40-role aggregation pipelines ensure internal and public listings never compete for space. Browse Both, Internal Only, or Public Only.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🏷️</div>
-                    <h3 class="text-xl font-bold mb-2">Smart Seniority Detection</h3>
-                    <p class="text-gray-400">Automatically classifies positions into Intern, Early (1–3 yrs), Mid (4–7 yrs), Advanced (7+ yrs), and Director levels based on job requirements.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🌍</div>
-                    <h3 class="text-xl font-bold mb-2">Global Tech Hubs</h3>
-                    <p class="text-gray-400">Track openings across 20+ countries and 24 major tech hubs (Cupertino, Austin, London, Hyderabad, Bengaluru, Singapore, Munich, etc.).</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🔔</div>
-                    <h3 class="text-xl font-bold mb-2">Instant System Alerts</h3>
-                    <p class="text-gray-400">Get instant, non-intrusive macOS system alerts whenever new matching roles are posted in your tracked regions.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">⏱️</div>
-                    <h3 class="text-xl font-bold mb-2">Custom Checks &amp; Digest</h3>
-                    <p class="text-gray-400">Set background check intervals from 5 minutes to 6 hours, plus scheduled weekday morning digests at 10:00 AM.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🔒</div>
-                    <h3 class="text-xl font-bold mb-2">100% On-Device</h3>
-                    <p class="text-gray-400">Your search queries and auth tokens never leave your Mac. Connects directly to Apple portals with zero intermediate servers.</p>
-                </div>
-                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/40 transition-colors">
-                    <div class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-4 text-2xl">🚀</div>
-                    <h3 class="text-xl font-bold mb-2">Native Swift &amp; Menu Bar UI</h3>
-                    <p class="text-gray-400">Adaptive monochrome icon for Light &amp; Dark modes. Built natively in Swift with SMAppService login launch, zero dependencies, and no Dock clutter.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- How it works -->
-    <section id="how-it-works" class="py-20 px-6">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-3xl font-bold mb-16 text-center">How it works</h2>
-            <div class="space-y-12">
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-brand-ink border border-white/20 flex items-center justify-center font-bold text-lg">1</div>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2">Select your hubs &amp; auth mode</h3>
-                        <p class="text-gray-400">Choose your preferred countries or cities to track public openings. Current Apple employees can toggle Internal Mode for direct AppleConnect SSO authentication to view internal-only roles.</p>
-                    </div>
-                </div>
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-white text-black flex items-center justify-center font-bold text-lg">2</div>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2 text-white">Silent background tracking</h3>
-                        <p class="text-gray-400">Jobs Monitor checks quietly in the background at your chosen frequency and maintains your 40+40 role cache across internal and public pipelines.</p>
-                    </div>
-                </div>
-                <div class="flex gap-6">
-                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-brand-ink border border-white/20 flex items-center justify-center font-bold text-lg">3</div>
-                    <div>
-                        <h3 class="text-xl font-bold mb-2">Open the dashboard</h3>
-                        <p class="text-gray-400">Click the menu bar icon to view active positions, filter by experience level, and jump directly into <code class="text-gray-300">jobs.apple.com</code> (public) or <code class="text-gray-300">careers.apple.com</code> (internal) with one click.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Launch Notes -->
-    <section id="launch" class="py-20 px-6 border-y border-white/5 bg-gradient-to-b from-white/5 to-transparent">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <span class="version-badge inline-block px-3 py-1 mb-4 rounded-full bg-white/10 border border-white/30 text-white text-xs font-mono">🎉 Latest Release</span>
-                <h2 class="text-3xl font-bold mb-4">Say hello to Jobs Monitor</h2>
-                <p class="text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                    Whether you're an external candidate tracking your next opportunity on Apple's public portal or a current Apple employee monitoring internal transfer requisitions, Jobs Monitor gives you: <span class="text-white font-semibold">real-time, on-device visibility for all Apple roles right from your status bar.</span>
-                </p>
-            </div>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <div class="text-2xl mb-3">🔐</div>
-                    <h3 class="font-bold text-lg mb-2"> Apple Employee SSO Handshake</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Headless WebKit engine with IDMS SSO redirect navigation delegates to automatically maintain authenticated session cookies on <code class="text-white">careers.apple.com</code> across corporate network roaming.</p>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <div class="text-2xl mb-3">🛡️</div>
-                    <h3 class="font-bold text-lg mb-2">Sleep-Wake &amp; Offline Protection</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">A 10-second sleep-wake debounce allows VPN tunnels and internal DNS routing to resolve before checks run, preserving your active dashboard cache.</p>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <div class="text-2xl mb-3">⚡️</div>
-                    <h3 class="font-bold text-lg mb-2">ProMotion 120Hz UI</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Hardware-accelerated SwiftUI changelog view with smooth momentum scrolling, plus instant real-time search across all role titles and locations.</p>
-                </div>
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <div class="text-2xl mb-3">🪶</div>
-                    <h3 class="font-bold text-lg mb-2">Light, quiet, and out of your way</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Jobs Monitor lives in your menu bar with no Dock clutter, built natively in Swift with zero dependencies. Turn on Launch at Login and forget it's even there.</p>
-                </div>
-            </div>
-            <p class="text-center text-gray-500 text-sm mt-10">Have an idea or feedback? <button onclick="copyEmail(this)" class="text-white hover:underline bg-transparent border-none cursor-pointer p-0">Contact Developer</button>.</p>
-        </div>
-    </section>
-
-    <!-- Install -->
-    <section id="install" class="py-20 bg-white/5 border-y border-white/5">
-        <div class="max-w-6xl mx-auto px-6">
-            <h2 class="text-3xl font-bold mb-12 text-center">Installation</h2>
-            <div class="max-w-2xl mx-auto space-y-6">
-                <!-- One-liner Command -->
-                <div class="bg-black/40 border border-white/10 rounded-2xl p-8">
-                    <h3 class="text-lg font-bold mb-4 text-white flex items-center gap-2">
-                        <span>⚡ One-Click Terminal Install (Recommended)</span>
-                    </h3>
-                    <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                        The easiest and fastest way to install Jobs Monitor. Simply copy and paste this command into your Terminal:
-                    </p>
-                    <div class="bg-black/60 border border-white/10 rounded-xl p-4 flex items-center justify-between font-mono text-sm overflow-x-auto gap-4">
-                        <span class="text-white select-all break-all text-left">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command)"</span>
-                        <button id="btn-copy-command" onclick="copyToClipboard('/bin/bash -c &quot;$(curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command)&quot;', 'btn-copy-command')"
-                                class="flex-shrink-0 bg-white/10 border border-white/20 text-white hover:bg-white hover:text-black px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all">
-                            Copy
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Manual fallback -->
-                <div class="bg-black/40 border border-white/10 rounded-2xl p-8">
-                    <h3 class="text-lg font-bold mb-4 text-white">Manual Installation (Fallback)</h3>
-                    <ol class="space-y-3 text-gray-300 list-decimal list-inside text-sm">
-                        <li><a href="https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command" download="install-jobsmonitor.command" class="text-white underline font-semibold hover:text-gray-300 transition-colors">Download install-jobsmonitor.command</a> file manually.</li>
-                        <li><span class="font-semibold text-white">Open Terminal</span> (⌘+Space, type "Terminal", press Enter).</li>
-                        <li>Type <span class="text-white font-mono">sh </span> — that's <span class="font-semibold text-white">s</span>, <span class="font-semibold text-white">h</span>, then a <span class="font-semibold text-white">space</span>.</li>
-                        <li><span class="font-semibold text-white">Drag and drop</span> the downloaded file into the Terminal window.</li>
-                        <li>Press <span class="font-semibold text-white">Enter</span> and follow the on-screen prompts, then drag Jobs Monitor onto Applications.</li>
-                    </ol>
-                </div>
-            </div>
-            <div class="mt-6 p-4 bg-black rounded border border-white/10 text-xs text-gray-500 font-mono break-all whitespace-pre-wrap max-w-2xl mx-auto"><span class="text-green-400">user@macbook ~ %</span> /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/install-jobsmonitor.command)"<br><span class="text-gray-400">==></span> Compiling and launching Jobs Monitor…</div>
-            <p class="text-center text-gray-500 text-sm mt-6 max-w-2xl mx-auto">First time only: the installer builds the application natively on your Mac so macOS Gatekeeper trusts it completely with no security warnings.</p>
-        </div>
-    </section>
-
-    <!-- Changelog -->
-    <section id="changelog" class="py-12 bg-black/40 border-b border-white/5">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-200">Release Notes</h2>
-                    <p class="text-xs text-gray-400 mt-1">Scroll sideways to explore version history</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="scrollCarousel('changelog-container', -360)" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-all">←</button>
-                    <button onclick="scrollCarousel('changelog-container', 360)" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-all">→</button>
-                </div>
-            </div>
-            <div id="changelog-container" class="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scroll-smooth">
-                <div class="text-center text-gray-500 animate-pulse w-full py-8">Loading updates…</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-6 border-t border-white/10 text-center">
-        <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8 text-xs text-gray-500">
-            <div>Built by <span class="text-white">Arun Thomas</span></div>
-            <button onclick="copyEmail(this)" class="hover:text-white transition-colors bg-transparent border-none cursor-pointer">Contact Developer</button>
-            <div class="text-gray-700">&copy; 2026 Jobs Monitor.</div>
-        </div>
-    </footer>
-
-    <script>
-        function scrollCarousel(id, amount) {
-            const el = document.getElementById(id);
-            if (el) el.scrollBy({ left: amount, behavior: 'smooth' });
-        }
-
-        // Mockup interactive tab filter
-        function filterMockup(type, btn) {
-            document.querySelectorAll('.mockup-tab').forEach(t => {
-                t.className = 'mockup-tab px-3 py-1.5 rounded-md text-gray-400 hover:text-white transition-all flex items-center gap-1';
-            });
-            btn.className = 'mockup-tab px-3 py-1.5 rounded-md bg-white text-black font-semibold shadow transition-all flex items-center gap-1';
-
-            const items = document.querySelectorAll('.job-item');
-            let visibleCount = 0;
-            items.forEach(item => {
-                const portal = item.getAttribute('data-portal');
-                if (type === 'all' || portal === type) {
-                    item.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            const label = document.getElementById('mockup-count-label');
-            if (label) {
-                const total = type === 'all' ? 80 : 40;
-                label.textContent = `Showing ${visibleCount} of ${total} active positions`;
-            }
-        }
-
-        // Mockup live search
-        function searchMockupJobs(query) {
-            const q = query.toLowerCase().trim();
-            const items = document.querySelectorAll('.job-item');
-            let visibleCount = 0;
-            items.forEach(item => {
-                const text = item.getAttribute('data-text') || '';
-                if (!q || text.includes(q)) {
-                    item.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            const label = document.getElementById('mockup-count-label');
-            if (label) {
-                label.textContent = `Showing ${visibleCount} matching positions`;
-            }
-        }
-
-        // Version pill from version.json
-        fetch('version.json').then(r => r.json()).then(data => {
-            if (data.version) {
-                const pill = document.getElementById('version-pill');
-                if (pill) {
-                    pill.innerHTML = `<span>v${data.version} Now Available</span> <span class="opacity-60 text-[10px]">↗</span>`;
-                    pill.href = `https://github.com/arunofhyd/JobsMonitor/releases/tag/v${data.version}`;
-                }
+        <!-- Interactive Sandbox: Test Menu Bar Dropdown & Notification Simulation -->
+        <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+            <div class="border border-borderLine-light dark:border-borderLine-dark rounded-xl p-6 bg-panel-light dark:bg-panel-dark">
                 
-                document.querySelectorAll('.version-label').forEach(el => el.textContent = 'v' + data.version);
-                document.querySelectorAll('.version-badge').forEach(el => el.textContent = '🎉 Now on v' + data.version);
-
-                const schema = document.querySelector('script[type="application/ld+json"]');
-                if (schema) {
-                    let json = JSON.parse(schema.textContent);
-                    json.softwareVersion = data.version;
-                    schema.textContent = JSON.stringify(json);
-                }
-
-                // Dynamically update favicon cache-busters from version.json
-                document.querySelectorAll('link[rel*="icon"]').forEach(link => {
-                    if (link.href) {
-                        const u = new URL(link.href, window.location.href);
-                        u.searchParams.set('v', data.version);
-                        link.href = u.toString();
-                    }
-                });
-            }
-
-            // Changelog Horizontal Carousel
-            const container = document.getElementById('changelog-container');
-            if (container && Array.isArray(data.changelog)) {
-                container.innerHTML = '';
-                data.changelog.forEach((release, index) => {
-                    const isLatest = index === 0;
-                    const div = document.createElement('div');
-                    div.className = `flex-none w-[320px] sm:w-[360px] snap-start bg-white/5 border ${isLatest ? 'border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.15)]' : 'border-white/10'} rounded-2xl p-6 hover:border-white/30 transition-all flex flex-col justify-between`;
-                    
-                    const header = `<div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2.5">
-                            <a href="https://github.com/arunofhyd/JobsMonitor/releases/tag/v${release.version}" target="_blank" rel="noopener noreferrer" class="text-white font-mono font-bold text-lg hover:underline flex items-center gap-1">
-                                <span>v${release.version}</span>
-                                <span class="text-xs opacity-60">↗</span>
-                            </a>
-                            ${isLatest ? `<span class="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/30 tracking-wider">LATEST</span>` : ''}
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
+                            <span class="font-mono text-xs uppercase tracking-wider text-brand-blue font-bold">MENU BAR SIMULATOR</span>
                         </div>
-                        ${release.date ? `<span class="text-gray-400 text-xs font-mono px-2 py-0.5 rounded bg-white/5 border border-white/5">${release.date}</span>` : ''}
-                    </div>`;
-                    const list = document.createElement('ul');
-                    list.className = 'space-y-2 text-gray-400 text-sm list-disc list-inside overflow-y-auto max-h-[160px] pr-1';
-                    (release.changes || []).forEach(change => {
-                        const li = document.createElement('li');
-                        li.className = 'leading-relaxed';
-                        li.textContent = change;
-                        list.appendChild(li);
-                    });
-                    div.innerHTML = header;
-                    div.appendChild(list);
-                    container.appendChild(div);
-                });
-            }
-        }).catch(() => {
-            const c = document.getElementById('changelog-container');
-            if (c) c.innerHTML = '<div class="text-red-500 text-center text-sm">Failed to load updates.</div>';
-        });
+                        <h3 class="text-xl font-bold tracking-tight mt-1">Simulate Real-Time Role Telemetry</h3>
+                        <p class="text-xs text-ink-mutedLight dark:text-ink-mutedDark">
+                            Filter live positions by role keyword or test trigger a simulated macOS banner alert.
+                        </p>
+                    </div>
 
-        function toggleJobsMonitorVideo() {
-            const video = document.getElementById('jobsmonitor-launch-video');
-            const btn = document.getElementById('jobsmonitor-video-btn');
+                    <button onclick="triggerJobNotification()" 
+                            class="px-3 py-1.5 rounded border border-borderLine-light dark:border-borderLine-dark hover:border-brand-blue text-xs font-mono text-brand-blue transition-colors flex items-center space-x-1.5">
+                        <span>🔔 Trigger Simulated Notification</span>
+                    </button>
+                </div>
+
+                <!-- Simulated Notification Banner -->
+                <div id="sim-notification" class="hidden mb-6 p-4 rounded-xl border border-brand-blue/50 bg-panel-subtleLight dark:bg-panel-subtleDark shadow-2xl flex items-center justify-between max-w-lg mx-auto font-mono text-xs animate-bounce">
+                    <div class="flex items-center space-x-3">
+                        <img src="logo-jobsmonitor.png" class="w-8 h-8 rounded object-cover">
+                        <div>
+                            <div class="font-bold text-ink-strongLight dark:text-ink-strongDark text-xs">Jobs Monitor ·  Cupertino</div>
+                            <div class="text-[11px] text-brand-blue">New Opening: Software Engineer (CoreOS &amp; Swift)</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-ink-faintLight">now</span>
+                </div>
+
+                <!-- Menu Bar Dropdown Simulation -->
+                <div class="max-w-xl mx-auto border border-borderLine-light dark:border-borderLine-dark rounded-lg overflow-hidden bg-panel-subtleLight dark:bg-panel-subtleDark shadow-xl font-mono text-xs">
+                    
+                    <div class="p-3 border-b border-borderLine-light dark:border-borderLine-dark flex items-center justify-between bg-panel-light dark:bg-panel-dark">
+                        <div class="flex items-center space-x-2">
+                            <img src="logo-jobsmonitor.png" class="w-4 h-4 rounded object-cover">
+                            <span class="font-bold">Apple Career Openings</span>
+                        </div>
+                        <span class="text-[10px] text-emerald-500 font-bold">● LIVE POLLING (5m)</span>
+                    </div>
+
+                    <div class="p-3 border-b border-borderLine-light dark:border-borderLine-dark">
+                        <input id="job-search" oninput="filterJobsList(this.value)" type="text" placeholder="Filter by keyword (e.g. Swift, AI, Silicon)..."
+                               class="w-full bg-panel-light dark:bg-panel-dark border border-borderLine-light dark:border-borderLine-dark rounded px-3 py-1.5 focus:outline-none text-xs">
+                    </div>
+
+                    <div id="job-list" class="divide-y divide-borderLine-light/60 dark:divide-borderLine-dark/60 max-h-64 overflow-y-auto">
+                        <div class="p-3 hover:bg-brand-blue/10 flex items-center justify-between transition-colors">
+                            <div>
+                                <div class="font-bold text-ink-strongLight dark:text-ink-strongDark">Software Engineer — CoreOS Kernel</div>
+                                <div class="text-[10px] text-ink-faintLight">Cupertino, CA · Full-Time · macOS Platform</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-brand-blue/10 text-brand-blue font-bold">TODAY</span>
+                        </div>
+
+                        <div class="p-3 hover:bg-brand-blue/10 flex items-center justify-between transition-colors">
+                            <div>
+                                <div class="font-bold text-ink-strongLight dark:text-ink-strongDark">Hardware Design Engineer — Silicon M-Series</div>
+                                <div class="text-[10px] text-ink-faintLight">Austin, TX · Silicon Engineering Group</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-500 font-bold">NEW</span>
+                        </div>
+
+                        <div class="p-3 hover:bg-brand-blue/10 flex items-center justify-between transition-colors">
+                            <div>
+                                <div class="font-bold text-ink-strongLight dark:text-ink-strongDark">Machine Learning Scientist — Vision &amp; Generative AI</div>
+                                <div class="text-[10px] text-ink-faintLight">London, UK · AI/ML Foundation Team</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 font-bold">VERIFIED</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Technical Manifesto Bento Grid (6 Pillars) -->
+        <section class="border-t border-borderLine-light dark:border-borderLine-dark py-20 bg-panel-subtleLight/40 dark:bg-panel-subtleDark/40">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                    <div>
+                        <div class="font-mono text-xs text-brand-blue tracking-wider uppercase mb-2">Engine Architecture</div>
+                        <h2 class="text-3xl sm:text-5xl font-bold tracking-tight">Silent background monitoring.</h2>
+                    </div>
+                    <p class="text-ink-mutedLight dark:text-ink-mutedDark font-mono text-xs max-w-md mt-4 md:mt-0">
+                        Built for software engineers and corporate candidates who want early signal on high-demand openings.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-borderLine-light dark:border-borderLine-dark">
+                    
+                    <!-- 01 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">01 / DISPATCH</span>
+                                <span>BACKGROUND DAEMON</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">Zero CPU Footprint</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Uses Apple DispatchTimerSource with efficient coalesce sleep intervals. Consumes 0.0% CPU when idle and draws zero perceptible battery power.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            Grand Central Dispatch Native
+                        </div>
+                    </div>
+
+                    <!-- 02 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">02 / PRIVACY</span>
+                                <span>ON-DEVICE</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">No Third-Party Intermediaries</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Connects directly between your Mac and Apple endpoints. Your search preferences, role filters, and candidate identifiers are never sent to external servers.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            Direct Endpoint Polling · No Proxy
+                        </div>
+                    </div>
+
+                    <!-- 03 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">03 / FILTERING</span>
+                                <span>REGEX &amp; REGIONS</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">Keyword &amp; Team Filters</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Target exact organizations (Platform Architecture, AI/ML, Hardware Engineering, Retail Corporate) and filter by country, remote status, or team code.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            Multi-Clause Query Matching
+                        </div>
+                    </div>
+
+                    <!-- 04 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">04 / NOTIFICATIONS</span>
+                                <span>USERNOTIFICATIONS</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">Native macOS Banners</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Instant Notification Center alerts when a matching requisition goes live. Click the notification banner to open the direct apply page in your browser.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            UNUserNotificationCenter Integration
+                        </div>
+                    </div>
+
+                    <!-- 05 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">05 / PORTALS</span>
+                                <span>INTERNAL SUPPORT</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">Internal Employee Portals</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Supports internal employee SSO and authenticated carrier endpoints for internal mobility transfers across teams.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            Authenticated Session Caching
+                        </div>
+                    </div>
+
+                    <!-- 06 -->
+                    <div class="spotlight-card p-8 border-r border-b border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark flex flex-col justify-between group hover:bg-panel-subtleLight dark:hover:bg-panel-subtleDark transition-colors">
+                        <div>
+                            <div class="flex items-center justify-between font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark mb-6">
+                                <span class="text-brand-blue font-bold">06 / DISTRIBUTION</span>
+                                <span>UNIVERSAL BINARY</span>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-3 tracking-tight">Universal Apple Binary</h3>
+                            <p class="text-sm text-ink-mutedLight dark:text-ink-mutedDark leading-relaxed">
+                                Fat binary compiled for Apple Silicon and Intel Macs with macOS 13+ support. Automated one-line terminal installer and in-app update checker.
+                            </p>
+                        </div>
+                        <div class="mt-8 pt-4 border-t border-borderLine-light/60 dark:border-borderLine-dark/60 font-mono text-[11px] text-ink-faintLight dark:text-ink-faintDark">
+                            Zero Dependency Swift AppKit
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Comparison Matrix -->
+        <section class="py-20 max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-10">
+                <span class="font-mono text-xs text-brand-blue uppercase tracking-wider">Engineering Comparison</span>
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mt-1">Why choose Jobs Monitor?</h2>
+            </div>
+
+            <div class="border border-borderLine-light dark:border-borderLine-dark rounded-lg overflow-x-auto bg-panel-light dark:bg-panel-dark">
+                <table class="w-full text-left font-mono text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-borderLine-light dark:border-borderLine-dark bg-panel-subtleLight dark:bg-panel-subtleDark text-ink-mutedLight dark:text-ink-mutedDark">
+                            <th class="p-4 font-medium uppercase tracking-wider">Capability</th>
+                            <th class="p-4 font-bold text-brand-blue uppercase tracking-wider">Jobs Monitor (macOS)</th>
+                            <th class="p-4 font-medium uppercase tracking-wider">LinkedIn / Web Scrapers</th>
+                            <th class="p-4 font-medium uppercase tracking-wider">Manual Portal Refreshing</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-borderLine-light dark:divide-borderLine-dark">
+                        <tr>
+                            <td class="p-4 font-sans font-medium text-ink-strongLight dark:text-ink-strongDark">Alert Latency</td>
+                            <td class="p-4 font-bold text-emerald-500">✓ Instant (Within minutes of posting)</td>
+                            <td class="p-4 text-red-400">✗ Hours to days delayed</td>
+                            <td class="p-4 text-neutral-400">⚠️ Manual refresh dependent</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-sans font-medium text-ink-strongLight dark:text-ink-strongDark">Internal Careers Portal Tracking</td>
+                            <td class="p-4 font-bold text-emerald-500">✓ Supported for Apple Employees</td>
+                            <td class="p-4 text-red-400">✗ Public web only</td>
+                            <td class="p-4 text-neutral-400">⚠️ Manual intranet browsing</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-sans font-medium text-ink-strongLight dark:text-ink-strongDark">System Resources</td>
+                            <td class="p-4 font-bold text-emerald-500">✓ Lightweight Menu Bar App</td>
+                            <td class="p-4 text-red-400">✗ Heavy browser tabs</td>
+                            <td class="p-4 text-neutral-400">⚠️ Wasted time</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-sans font-medium text-ink-strongLight dark:text-ink-strongDark">Account / Subscription</td>
+                            <td class="p-4 font-bold text-emerald-500">✓ 100% Free &amp; Open Source (MIT)</td>
+                            <td class="p-4 text-red-400">✗ Monthly SaaS fees / spam</td>
+                            <td class="p-4 text-emerald-500">✓ Free</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Interactive Changelog & Releases -->
+        <section id="changelog" class="border-t border-borderLine-light dark:border-borderLine-dark py-20 bg-panel-subtleLight/30 dark:bg-panel-subtleDark/30">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10">
+                    <div>
+                        <span class="font-mono text-xs text-brand-blue uppercase tracking-wider">Release Telemetry</span>
+                        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mt-1">Continuous daemon evolution.</h2>
+                    </div>
+                    <div class="mt-4 sm:mt-0 font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span class="version-badge">Active v2.3.7</span>
+                    </div>
+                </div>
+
+                <div id="changelog-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-xs">
+                    <div class="p-6 rounded border border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-brand-blue font-bold text-sm">v2.3.7 (Latest)</span>
+                            <span class="text-neutral-400 text-[11px]">2026-10-12</span>
+                        </div>
+                        <p class="text-neutral-400 text-xs">Loading updates...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Colophon / Footer -->
+        <footer class="border-t border-borderLine-light dark:border-borderLine-dark py-16 bg-canvas-light dark:bg-canvas-dark transition-colors duration-200">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 font-mono text-xs text-ink-mutedLight dark:text-ink-mutedDark">
+                
+                <div>
+                    <div class="flex items-center space-x-2.5 mb-2">
+                        <img src="logo-jobsmonitor.png" alt="JobsMonitor" class="w-4 h-4 rounded object-cover">
+                        <span class="font-bold text-sm tracking-tight font-sans text-neutral-900 dark:text-white">JOBS MONITOR</span>
+                        <span class="text-neutral-400">/</span>
+                        <span>BY ARUN THOMAS</span>
+                    </div>
+                    <p class="text-ink-faintLight dark:text-ink-faintDark max-w-sm font-sans text-xs">
+                        Open-source software engineered for speed, privacy, and career signals on macOS.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-6">
+                    <a href="https://github.com/arunofhyd/JobsMonitor" target="_blank" rel="noopener noreferrer" class="hover:text-brand-blue transition-colors">GitHub Repository ↗</a>
+                    <a href="https://github.com/arunofhyd/JobsMonitor/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="hover:text-brand-blue transition-colors">MIT License</a>
+                    <a href="https://arunofhyd.github.io/my-portfolio/" target="_blank" rel="noopener noreferrer" class="hover:text-brand-blue transition-colors">Developer Portfolio ↗</a>
+                    <a href="mailto:arunthomas04042001@gmail.com" class="hover:text-brand-blue transition-colors">Contact</a>
+                </div>
+
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Interactive Client Scripts -->
+    <script>
+        function toggleJobsVideo() {
+            const video = document.getElementById('jobs-launch-video');
+            const btn = document.getElementById('jobs-video-btn');
             if (!video) return;
             if (video.paused) {
                 video.play();
@@ -693,38 +613,97 @@
             }
         }
 
-        // Typing effect & video event listeners
+        // Spotlight Cursor Tracking
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.spotlight-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Sandbox Job Filter
+        function filterJobsList(val) {
+            const q = val.toLowerCase().trim();
+            const items = document.querySelectorAll('#job-list > div');
+            items.forEach(item => {
+                if (q === '' || item.innerText.toLowerCase().includes(q)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function triggerJobNotification() {
+            const banner = document.getElementById('sim-notification');
+            banner.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 4000);
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            const vid = document.getElementById('jobsmonitor-launch-video');
+            const vid = document.getElementById('jobs-launch-video');
             if (vid) {
                 vid.addEventListener('play', () => {
-                    const btn = document.getElementById('jobsmonitor-video-btn');
+                    const btn = document.getElementById('jobs-video-btn');
                     if (btn) btn.textContent = '⏸ Pause Film';
                 });
                 vid.addEventListener('pause', () => {
-                    const btn = document.getElementById('jobsmonitor-video-btn');
+                    const btn = document.getElementById('jobs-video-btn');
                     if (btn) btn.textContent = '▶ Play Film';
-                });
-                vid.addEventListener('ended', () => {
-                    const btn = document.getElementById('jobsmonitor-video-btn');
-                    if (btn) btn.textContent = '▶ Replay Film';
                 });
             }
 
-            const el = document.getElementById('typing-text');
-            if (!el) return;
-            const phrases = ["Yours alone.", "Tracked in real time.", " Internal SSO & Public roles."];
-            let pi = 0, ci = 0, deleting = false, speed = 100;
-            function type() {
-                const cur = phrases[pi];
-                if (deleting) { el.textContent = cur.substring(0, ci - 1); ci--; speed = 50; }
-                else { el.textContent = cur.substring(0, ci + 1); ci++; speed = 100; }
-                if (!deleting && ci === cur.length) { deleting = true; speed = 2000; }
-                else if (deleting && ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; speed = 500; }
-                setTimeout(type, speed);
-            }
-            el.textContent = '';
-            setTimeout(type, 500);
+            fetch('version.json').then(r => r.json()).then(data => {
+                if (data.version) {
+                    const pill = document.getElementById('version-pill');
+                    if (pill) {
+                        pill.innerHTML = `<span>v${data.version}</span> <span class="opacity-50 text-[10px]">↗</span>`;
+                        pill.href = `https://github.com/arunofhyd/JobsMonitor/releases/tag/v${data.version}`;
+                    }
+                    document.querySelectorAll('.version-label').forEach(el => el.textContent = 'v' + data.version);
+                    document.querySelectorAll('.version-badge').forEach(el => el.textContent = 'Active v' + data.version);
+                }
+
+                const container = document.getElementById('changelog-container');
+                if (container && Array.isArray(data.changelog)) {
+                    container.innerHTML = '';
+                    data.changelog.slice(0, 6).forEach((release, index) => {
+                        const isLatest = index === 0;
+                        const card = document.createElement('div');
+                        card.className = `spotlight-card p-6 rounded border ${isLatest ? 'border-brand-blue/60 bg-panel-light dark:bg-panel-dark' : 'border-borderLine-light dark:border-borderLine-dark bg-panel-light dark:bg-panel-dark'} flex flex-col justify-between`;
+                        
+                        let changesHtml = (release.changes || []).map(c => `
+                            <li class="leading-relaxed text-ink-mutedLight dark:text-ink-mutedDark text-xs font-sans list-disc list-inside">
+                                ${c}
+                            </li>
+                        `).join('');
+
+                        card.innerHTML = `
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center space-x-2">
+                                        <a href="https://github.com/arunofhyd/JobsMonitor/releases/tag/v${release.version}" target="_blank" rel="noopener noreferrer" class="font-bold text-brand-blue hover:underline text-sm font-mono">
+                                            v${release.version}
+                                        </a>
+                                        ${isLatest ? `<span class="px-1.5 py-0.5 rounded text-[10px] bg-brand-blue/10 border border-brand-blue/30 text-brand-blue font-semibold">LATEST</span>` : ''}
+                                    </div>
+                                    <span class="text-ink-faintLight dark:text-ink-faintDark text-[11px] font-mono">${release.date || ''}</span>
+                                </div>
+                                <ul class="space-y-2 mt-2">
+                                    ${changesHtml}
+                                </ul>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                }
+            }).catch(() => {});
         });
     </script>
 </body>
