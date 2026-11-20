@@ -83,7 +83,10 @@ if [ -z "$APP_VERSION" ]; then
     APP_VERSION="$(grep -m1 'APP_VERSION' "$BUILD_DIR/main.swift" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || true)"
 fi
 if [ -z "$APP_VERSION" ]; then
-    APP_VERSION="2.3.5"
+    APP_VERSION=$(curl -fsSL "https://raw.githubusercontent.com/arunofhyd/JobsMonitor/main/version.json" 2>/dev/null | python3 -c "import sys, json; print(json.load(sys.stdin)['version'])" 2>/dev/null || true)
+fi
+if [ -z "$APP_VERSION" ]; then
+    APP_VERSION="2.3.7"
 fi
 
 ok "Source code and assets prepared (v${APP_VERSION})."
